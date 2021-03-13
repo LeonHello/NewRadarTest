@@ -344,7 +344,7 @@ public class LidarDevice {
                     && jsonrpc != null && jsonrpc.equals("2.0")) {
                 JSONObject params = jsonObj.getJSONObject("params");
                 block = params.getIntValue("block");
-                Log.i(TAG, "block is " + block);
+                // Log.i(TAG, "block is " + block);
                 JSONArray layers = params.getJSONArray("layers");
                 if (layers.size() == 1) {
                     JSONObject layerObj = layers.getJSONObject(0);
