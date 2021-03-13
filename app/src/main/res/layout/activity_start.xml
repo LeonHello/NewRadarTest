@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="60dp"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:id="@+id/GL1"
+        >
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/text_ip"
+                android:textColor="@color/background_floating_material_dark"
+                android:layout_marginTop="18dp"
+                android:layout_marginStart="10dp"
+                android:id="@+id/text_ip" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="25dp"
+                android:textColor="@color/background_floating_material_dark"
+                android:layout_marginStart="10dp"
+                android:text="@string/text_port"
+                android:id="@+id/text_port" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="150dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="7dp">
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:hint="@string/text_ip_hint"
+                android:layout_marginTop="10dp"
+                android:id="@+id/edit_ip"
+                android:text="@string/edit_ip"/>
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:hint="@string/text_port_hint"
+                android:id="@+id/edit_port"
+                android:layout_marginTop="5dp"
+                android:text="@string/edit_port"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent">
+            <Button
+                android:layout_width="100dp"
+                android:layout_height="40dp"
+                android:text="@string/btn_connect"
+                android:id="@+id/btn_connect"
+                android:background="@color/accent_material_light"
+                android:textColor="@color/abc_primary_text_disable_only_material_dark"
+                android:layout_marginTop="5dp"
+                android:layout_marginStart="20dp"/>
+
+            <Button
+                android:layout_width="100dp"
+                android:layout_height="40dp"
+                android:text="@string/btn_disconnect"
+                android:id="@+id/btn_disconnect"
+                android:background="@color/accent_material_light"
+                android:textColor="@color/abc_primary_text_disable_only_material_dark"
+                android:layout_marginTop="5dp"
+                android:layout_marginStart="20dp"/>
+        </LinearLayout>
+
+    </GridLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:layout_gravity="center">
+        <Button
+            android:layout_width="140dp"
+            android:layout_height="40dp"
+            android:text="@string/btn_startStreaming"
+            android:id="@+id/btn_startStreaming"
+            android:background="@color/accent_material_light"
+            android:textColor="@color/abc_primary_text_disable_only_material_dark"
+            />
+
+        <Button
+            android:layout_width="140dp"
+            android:layout_height="40dp"
+            android:text="@string/btn_stopStreaming"
+            android:id="@+id/btn_stopStreaming"
+            android:background="@color/accent_material_light"
+            android:textColor="@color/abc_primary_text_disable_only_material_dark"
+            android:layout_marginStart="15dp"
+            />
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="30dp"
+        >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/background_floating_material_dark"
+            android:text="测试正中间距离(单位mm)"
+            android:textSize="20sp"
+            />
+
+        <TextView
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/background_floating_material_dark"
+            android:text="-1"
+            android:layout_marginTop="20dp"
+            android:textSize="30sp"
+            android:id="@+id/text_test"
+            />
+
+    </LinearLayout>
+
+</LinearLayout>

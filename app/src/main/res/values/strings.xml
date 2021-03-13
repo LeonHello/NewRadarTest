@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">NewRadarTest</string>
+    <string name="new_radar_test">NewRadarTest</string>
+    <string name="text_ip">IP地址:</string>
+    <string name="text_port">端口号:</string>
+    <string name="text_ip_hint">请输入IP地址...</string>
+    <string name="edit_ip">192.168.10.160</string>
+    <string name="text_port_hint">请输入端口号...</string>
+    <string name="edit_port">2105</string>
+    <string name="btn_connect">连接雷达</string>
+    <string name="btn_disconnect">断开雷达</string>
+    <string name="btn_startStreaming">启动数据传输</string>
+    <string name="btn_stopStreaming">停止数据传输</string>
+</resources>
