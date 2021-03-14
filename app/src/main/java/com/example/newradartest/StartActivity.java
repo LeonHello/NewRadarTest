@@ -109,7 +109,7 @@ public class StartActivity extends Activity {
                     Toast.makeText(StartActivity.this, "成功启动雷达数据传输", Toast.LENGTH_SHORT).show();
 
                     lidarDevice.handleReaderThread();
-                    lidarDevice.getScanFrequency();
+                    // lidarDevice.getScanFrequency();
 
 
                 } else {

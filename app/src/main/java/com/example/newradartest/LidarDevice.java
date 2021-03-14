@@ -62,6 +62,7 @@ public class LidarDevice {
      * a frame has 8 blocks, a block has 96 ranges (30Hz for example), frame.length = 8 * 96
      */
     private ArrayList<Integer> frame;
+    private ArrayList<Double> frameDistance;
     /**
      * 当前扫描数据对应的block
      */
@@ -95,7 +96,7 @@ public class LidarDevice {
 
         setConnected(false);
         setStreamed(false);
-        setFrequency(60);
+        setFrequency(30);
 
         int cpuNumbers = Runtime.getRuntime().availableProcessors();
         // 根据CPU数目初始化线程池
@@ -104,6 +105,7 @@ public class LidarDevice {
         mHandler = handler;
 
         frame = new ArrayList<>();
+        frameDistance = new ArrayList<>();
         block = -1;
 
     }
@@ -271,13 +273,15 @@ public class LidarDevice {
                                 if (block != index) {
                                     index = 0;
                                     frame.clear();
+                                    frameDistance.clear();
                                     continue;
                                 }
                                 index++;
                                 if (index == 8) {
                                     index = 0;
-                                    updateUI(frame);
+                                    updateUI();
                                     frame.clear();
+                                    frameDistance.clear();
                                 }
                             }
                         }
@@ -351,11 +355,18 @@ public class LidarDevice {
                     String ranges = layerObj.getString("ranges");
                     // 解析base64 ranges单位为2mm
                     byte[] rangesByte = Base64.decode(ranges, Base64.DEFAULT);
+                    int len = rangesByte.length;
                     // Log.i(TAG, "rangesStr is " + Arrays.toString(rangesByte));
-                    for (int i = 0; i < rangesByte.length; i = i + 2) {
+                    for (int i = 0; i < len; i = i + 2) {
                         // range单位转化成1mm
                         int range = ((rangesByte[i] & 0xff) + ((rangesByte[i + 1] & 0xff) << 8)) * 2;
                         frame.add(range);
+                        // 距离乘以对应cos三角函数转化
+                        // rangesByte.length is 192 (96 * 2) when frequency is 30Hz
+                        // -135 + block * 33.75 + 33.75 / (rangesByte.length / 2) * (i / 2 + 1)
+                        double angle = -135 + block * 33.75 + 33.75 / (len / 2.0) * (i / 2.0 + 1);
+                        double distance = range * Math.cos(Math.toRadians(angle));
+                        frameDistance.add(distance);
                     }
                 }
             }
@@ -370,10 +381,10 @@ public class LidarDevice {
      * 一帧数据计算距离
      * 通过mHandler发送结果至主线程更新UI
      */
-    private void updateUI(ArrayList<Integer> data) {
+    private void updateUI() {
         Message msg = mHandler.obtainMessage();
         msg.what = 44;
-        msg.obj = data.get(data.size() / 2 - 1);
+        msg.obj = frameDistance.get(frameDistance.size() / 2 - 5);
         mHandler.sendMessage(msg);
     }
 
@@ -396,6 +407,32 @@ public class LidarDevice {
             case 25:
             case 30:
                 Log.i(TAG, "frequency is 25 or 30");
+                break;
+        }
+    }
+
+    /**
+     * 极坐标系到直角坐标系的转化工具
+     */
+    public void util() {
+        switch (frequency) {
+            case 10:
+                Log.i(TAG, "frequency is 10Hz");
+                // 288 * 8 cos sin 270
+                break;
+            case 15:
+                Log.i(TAG, "frequency is 15Hz");
+                // 192 * 8 cos sin 270
+                break;
+            case 20:
+                Log.i(TAG, "frequency is 20Hz");
+                // 144 * 8 cos sin 270
+                break;
+            case 25:
+            case 30:
+                Log.i(TAG, "frequency is 25Hz or 30Hz");
+                // 96 * 8 cos sin 270
+
                 break;
         }
     }
