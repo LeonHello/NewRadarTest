@@ -13,6 +13,8 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
+import java.util.concurrent.TimeUnit;
+
 public class StartActivity extends Activity {
     /**
      * 定义Handler对象
@@ -22,7 +24,7 @@ public class StartActivity extends Activity {
         /* 当有消息发送出来的时候就执行Handler的这个方法 */
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            switch (msg.what){
+            switch (msg.what) {
                 case 44:
                     /* 调试输出 */
                     Log.i("mHandler", "-->" + msg.obj.toString());
@@ -50,6 +52,7 @@ public class StartActivity extends Activity {
 
         Button btn_connect = (Button) findViewById(R.id.btn_connect);
         Button btn_disconnect = (Button) findViewById(R.id.btn_disconnect);
+        Button btn_getScanFrequency = (Button) findViewById(R.id.btn_getScanFrequency);
         Button btn_startStreaming = (Button) findViewById(R.id.btn_startStreaming);
         Button btn_stopStreaming = (Button) findViewById(R.id.btn_stopStreaming);
 
@@ -63,6 +66,15 @@ public class StartActivity extends Activity {
                     String IPAdr = edit_ip.getText().toString();
                     int PORT = Integer.parseInt(edit_port.getText().toString());
                     lidarDevice.connect(IPAdr, PORT);
+
+                    try {
+                        TimeUnit.SECONDS.sleep(1);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    // 连接雷达后立即开始处理输入流
+                    lidarDevice.handleReaderThread();
 
                     Toast.makeText(StartActivity.this, "连接雷达成功", Toast.LENGTH_SHORT).show();
 
@@ -97,6 +109,28 @@ public class StartActivity extends Activity {
             }
         });
 
+        /* 获取雷达扫描频率按钮 */
+        btn_getScanFrequency.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if (lidarDevice.isConnected()) {
+
+                    lidarDevice.getScanFrequency();
+
+                    int fre = lidarDevice.getFrequency();
+
+                    Toast.makeText(StartActivity.this, "雷达扫描频率为" + fre + "Hz", Toast.LENGTH_SHORT).show();
+
+                } else {
+
+                    Toast.makeText(StartActivity.this, "未与雷达连接", Toast.LENGTH_SHORT).show();
+
+                }
+
+            }
+        });
+
 
         /* 启动雷达数据传输按钮 */
         btn_startStreaming.setOnClickListener(new View.OnClickListener() {
@@ -107,10 +141,6 @@ public class StartActivity extends Activity {
 
                     lidarDevice.startStreaming();
                     Toast.makeText(StartActivity.this, "成功启动雷达数据传输", Toast.LENGTH_SHORT).show();
-
-                    lidarDevice.handleReaderThread();
-                    // lidarDevice.getScanFrequency();
-
 
                 } else {
 
@@ -142,7 +172,6 @@ public class StartActivity extends Activity {
         });
 
     }
-
 
 
 }

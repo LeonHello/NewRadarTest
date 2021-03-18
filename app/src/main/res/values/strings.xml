@@ -11,4 +11,5 @@
     <string name="btn_disconnect">断开雷达</string>
     <string name="btn_startStreaming">启动数据传输</string>
     <string name="btn_stopStreaming">停止数据传输</string>
+    <string name="btn_getScanFrequency">获取雷达频率</string>
 </resources>

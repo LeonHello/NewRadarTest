@@ -85,6 +85,10 @@ public class LidarDevice {
         frequency = fre;
     }
 
+    public int getFrequency() {
+        return frequency;
+    }
+
     /**
      * 构造函数
      */
@@ -96,7 +100,7 @@ public class LidarDevice {
 
         setConnected(false);
         setStreamed(false);
-        setFrequency(30);
+        setFrequency(-1);
 
         int cpuNumbers = Runtime.getRuntime().availableProcessors();
         // 根据CPU数目初始化线程池
