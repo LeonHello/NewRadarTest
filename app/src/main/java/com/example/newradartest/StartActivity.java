@@ -110,6 +110,7 @@ public class StartActivity extends Activity {
 
                     int fre = lidarDevice.getFrequency();
 
+                    Log.i("LidarDevice", "雷达扫描频率为" + fre + "Hz");
                     Toast.makeText(StartActivity.this, "雷达扫描频率为" + fre + "Hz", Toast.LENGTH_SHORT).show();
 
                 } else {
