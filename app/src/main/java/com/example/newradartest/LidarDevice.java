@@ -419,7 +419,7 @@ public class LidarDevice {
     private double LiDingLeft(ArrayList<Integer> dataX, ArrayList<Integer> dataY) {
         double dis = 2000;
         for (int i = 128 * 3; i < 128 * 5; i++) {
-            if (dataX.get(i) > 2000 || dataY.get(i) > 1000) {
+            if (dataX.get(i) > 2000 || dataY.get(i) > 1000 || dataX.get(i) <= 0) {
                 dataX.set(i, 2000);
             } else {
                 if (dataX.get(i) < dis)
@@ -432,7 +432,7 @@ public class LidarDevice {
     private double LiDingRight(ArrayList<Integer> dataX, ArrayList<Integer> dataY) {
         double dis = 2000;
         for (int i = 128; i < 128 * 3; i++) {
-            if (dataX.get(i) > 2000 || dataY.get(i) < -1000) {
+            if (dataX.get(i) > 2000 || dataY.get(i) < -1000 || dataX.get(i) <= 0) {
                 dataX.set(i, 2000);
             } else {
                 if (dataX.get(i) < dis)
