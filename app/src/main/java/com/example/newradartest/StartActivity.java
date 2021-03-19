@@ -13,7 +13,6 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
-import java.util.concurrent.TimeUnit;
 
 public class StartActivity extends Activity {
     /**
@@ -66,15 +65,6 @@ public class StartActivity extends Activity {
                     String IPAdr = edit_ip.getText().toString();
                     int PORT = Integer.parseInt(edit_port.getText().toString());
                     lidarDevice.connect(IPAdr, PORT);
-
-                    try {
-                        TimeUnit.SECONDS.sleep(1);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-
-                    // 连接雷达后立即开始处理输入流
-                    lidarDevice.handleReaderThread();
 
                     Toast.makeText(StartActivity.this, "连接雷达成功", Toast.LENGTH_SHORT).show();
 

@@ -62,7 +62,7 @@ public class LidarDevice {
      * a frame has 8 blocks, a block has 96 ranges (30Hz for example), frame.length = 8 * 96
      */
     private ArrayList<Integer> frame;
-    private ArrayList<Double> frameDistance;
+    private ArrayList<Integer> frameDistance;
     /**
      * 当前扫描数据对应的block
      */
@@ -126,6 +126,7 @@ public class LidarDevice {
             public void run() {
                 if (startTcpConnection(IPAdr, PORT)) {
                     setConnected(true);
+                    handleReader();
                     Log.i(TAG, "设备连接成功");
                 } else {
                     setConnected(false);
@@ -147,13 +148,12 @@ public class LidarDevice {
             if (socket == null) {
                 /* 建立socket */
                 socket = new Socket(IPAdr, PORT);
+                Log.i(TAG, "tcp连接创建成功");
             }
             /* 输出流 */
             writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             /* 输入流 */
             reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
-            Log.i(TAG, "tcp连接创建成功");
 
             return true;
 
@@ -240,7 +240,7 @@ public class LidarDevice {
         mThreadPool.execute(new Runnable() {
             @Override
             public void run() {
-                String s = "{\"jsonrpc\":\"2.0\",\"method\":\"settings/get\",\"params\":{\"entry\":\"scan.frequency\"},\"id\":\"getScanFrequency\"}";
+                String s = "{\"jsonrpc\":\"2.0\",\"method\":\"settings/get\",\"params\":{\"entry\":\"scan.frequency\"},\"id\":\"getScanFrequency\"}" + "\r\n";
                 try {
                     writer.write(s);
                     writer.flush();
@@ -253,50 +253,44 @@ public class LidarDevice {
     }
 
     /**
-     * 处理输入流线程
+     * 处理输入流
      */
-    public void handleReaderThread() {
-        mThreadPool.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    String str;
-                    int index = 0;
-                    while ((str = reader.readLine()) != null) {
-                        // 当雷达已连接时, 解析常规命令
-                        if (isConnected) {
-                            decodeRegularInstruction(str);
-                        }
-
-                        // 当雷达已连接并且已开始传输数据时, 解析雷达扫描数据并计算距离
-                        if (isConnected && isStreamed) {
-                            decodeScanData(str);
-
-                            // 将8个block数据组合成一帧, 用于距离计算
-                            if (index < 8) {
-                                if (block != index) {
-                                    index = 0;
-                                    frame.clear();
-                                    frameDistance.clear();
-                                    continue;
-                                }
-                                index++;
-                                if (index == 8) {
-                                    index = 0;
-                                    updateUI(frameDistance);
-                                    frame.clear();
-                                    frameDistance.clear();
-                                }
-                            }
-                        }
-
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
+    private void handleReader() {
+        try {
+            String str;
+            int index = 0;
+            while ((str = reader.readLine()) != null) {
+                // 当雷达已连接时, 解析常规命令
+                if (isConnected) {
+                    decodeRegularInstruction(str);
                 }
-            }
-        });
 
+                // 当雷达已连接并且已开始传输数据时, 解析雷达扫描数据并计算距离
+                if (isConnected && isStreamed) {
+                    decodeScanData(str);
+
+                    // 将8个block数据组合成一帧, 用于距离计算
+                    if (index < 8) {
+                        if (block != index) {
+                            index = 0;
+                            frame.clear();
+                            frameDistance.clear();
+                            continue;
+                        }
+                        index++;
+                        if (index == 8) {
+                            index = 0;
+                            updateUI(frameDistance);
+                            frame.clear();
+                            frameDistance.clear();
+                        }
+                    }
+                }
+
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
 
@@ -369,7 +363,7 @@ public class LidarDevice {
                         // rangesByte.length is 192 (96 * 2) when frequency is 30Hz
                         // -135 + block * 33.75 + 33.75 / (rangesByte.length / 2) * (i / 2 + 1)
                         double angle = -135 + block * 33.75 + 33.75 / (len / 2.0) * (i / 2.0 + 1);
-                        double distance = range * Math.cos(Math.toRadians(angle));
+                        int distance = (int) (range * Math.cos(Math.toRadians(angle)));
                         frameDistance.add(distance);
                     }
                 }
@@ -385,10 +379,10 @@ public class LidarDevice {
      * 一帧数据计算距离
      * 通过mHandler发送结果至主线程更新UI
      */
-    private void updateUI(ArrayList<Double> data) {
+    private void updateUI(ArrayList<Integer> data) {
         Message msg = mHandler.obtainMessage();
         msg.what = 44;
-        msg.obj = LiDing(data);
+        msg.obj = data.get(data.size() / 2);
         mHandler.sendMessage(msg);
     }
 
@@ -400,11 +394,11 @@ public class LidarDevice {
      * 数组下标范围 左侧 128 * 3 ---- 128 * 5
      * 数组下标范围 右侧 128 * 1 ---- 128 * 3
      */
-    private double LiDing(ArrayList<Double> data) {
+    private double LiDing(ArrayList<Integer> data) {
         double dis = 2000;
         for (int i = 128 * 3; i < 128 * 5; i++) {
             if (data.get(i) > 2000 || data.get(i) < 10)
-                data.set(i, 0.0);
+                data.set(i, 0);
             else {
                 if (data.get(i) < dis)
                     dis = data.get(i);
