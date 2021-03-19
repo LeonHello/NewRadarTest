@@ -26,19 +26,19 @@ public class StartActivity extends Activity {
             switch (msg.what) {
                 case 43:
                     /* 调试输出 */
-                    Log.i("mHandler", "-->" + msg.obj.toString());
+                    Log.i("mHandler", " middle-->" + msg.obj.toString());
                     /* 更新UI */
                     text_middle.setText(msg.obj.toString());
                     break;
                 case 44:
                     /* 调试输出 */
-                    Log.i("mHandler", "-->" + msg.obj.toString());
+                    Log.i("mHandler", " left-->" + msg.obj.toString());
                     /* 更新UI */
                     text_left.setText(msg.obj.toString());
                     break;
                 case 45:
                     /* 调试输出 */
-                    Log.i("mHandler", "-->" + msg.obj.toString());
+                    Log.i("mHandler", " right-->" + msg.obj.toString());
                     /* 更新UI */
                     text_right.setText(msg.obj.toString());
                     break;
