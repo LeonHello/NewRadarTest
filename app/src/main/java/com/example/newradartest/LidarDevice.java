@@ -283,7 +283,7 @@ public class LidarDevice {
                                 index++;
                                 if (index == 8) {
                                     index = 0;
-                                    updateUI();
+                                    updateUI(frameDistance);
                                     frame.clear();
                                     frameDistance.clear();
                                 }
@@ -385,13 +385,33 @@ public class LidarDevice {
      * 一帧数据计算距离
      * 通过mHandler发送结果至主线程更新UI
      */
-    private void updateUI() {
+    private void updateUI(ArrayList<Double> data) {
         Message msg = mHandler.obtainMessage();
         msg.what = 44;
-        msg.obj = frameDistance.get(frameDistance.size() / 2 - 5);
+        msg.obj = LiDing(data);
         mHandler.sendMessage(msg);
     }
 
+    /**
+     * 30Hz for example, frameDistance 96 * 8
+     * 单路立定跳远 左侧 4 5 block + part of 6 block
+     * 单路立定跳远 右侧 2 3 block + part of 1 block
+     * when transform to 6 blocks, 96 * 8 / 6 = 128
+     * 数组下标范围 左侧 128 * 3 ---- 128 * 5
+     * 数组下标范围 右侧 128 * 1 ---- 128 * 3
+     */
+    private double LiDing(ArrayList<Double> data) {
+        double dis = 2000;
+        for (int i = 128 * 3; i < 128 * 5; i++) {
+            if (data.get(i) > 2000 || data.get(i) < 10)
+                data.set(i, 0.0);
+            else {
+                if (data.get(i) < dis)
+                    dis = data.get(i);
+            }
+        }
+        return dis;
+    }
 
     /**
      * 通过三角函数计算一帧内所有数据点的距离
