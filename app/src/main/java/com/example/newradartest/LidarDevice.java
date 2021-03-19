@@ -62,7 +62,9 @@ public class LidarDevice {
      * a frame has 8 blocks, a block has 96 ranges (30Hz for example), frame.length = 8 * 96
      */
     private ArrayList<Integer> frame;
-    private ArrayList<Integer> frameDistance;
+    private ArrayList<Integer> frameDistanceCos;
+    private ArrayList<Integer> frameDistanceSin;
+
     /**
      * 当前扫描数据对应的block
      */
@@ -109,7 +111,8 @@ public class LidarDevice {
         mHandler = handler;
 
         frame = new ArrayList<>();
-        frameDistance = new ArrayList<>();
+        frameDistanceCos = new ArrayList<>();
+        frameDistanceSin = new ArrayList<>();
         block = -1;
 
     }
@@ -277,15 +280,17 @@ public class LidarDevice {
                         if (block != index) {
                             index = 0;
                             frame.clear();
-                            frameDistance.clear();
+                            frameDistanceCos.clear();
+                            frameDistanceSin.clear();
                             continue;
                         }
                         index++;
                         if (index == 8) {
                             index = 0;
-                            updateUI(frameDistance);
+                            updateUI(frameDistanceCos, frameDistanceSin);
                             frame.clear();
-                            frameDistance.clear();
+                            frameDistanceCos.clear();
+                            frameDistanceSin.clear();
                         }
                     }
                 }
@@ -366,8 +371,11 @@ public class LidarDevice {
                         // rangesByte.length is 192 (96 * 2) when frequency is 30Hz
                         // -135 + block * 33.75 + 33.75 / (rangesByte.length / 2) * (i / 2 + 1)
                         double angle = -135 + block * 33.75 + 33.75 / (len / 2.0) * (i / 2.0 + 1);
-                        int distance = (int) (range * Math.cos(Math.toRadians(angle)));
-                        frameDistance.add(distance);
+                        double radian = Math.toRadians(angle);
+                        int distanceCos = (int) (range * Math.cos(radian));
+                        frameDistanceCos.add(distanceCos);
+                        int distanceSin = (int) (range * Math.sin(radian));
+                        frameDistanceCos.add(distanceSin);
                     }
                 }
             }
@@ -382,11 +390,22 @@ public class LidarDevice {
      * 一帧数据计算距离
      * 通过mHandler发送结果至主线程更新UI
      */
-    private void updateUI(ArrayList<Integer> data) {
+    private void updateUI(ArrayList<Integer> dataX, ArrayList<Integer> dataY) {
         Message msg = mHandler.obtainMessage();
-        msg.what = 44;
-        msg.obj = data.get(data.size() / 2);
+        msg.what = 43;
+        msg.obj = dataX.get(dataX.size() / 2);
         mHandler.sendMessage(msg);
+
+        Message msg1 = mHandler.obtainMessage();
+        msg1.what = 44;
+        msg1.obj = LiDingLeft(dataX, dataY);
+        mHandler.sendMessage(msg1);
+
+        Message msg2 = mHandler.obtainMessage();
+        msg2.what = 45;
+        msg2.obj = LiDingRight(dataX, dataY);
+        mHandler.sendMessage(msg2);
+
     }
 
     /**
@@ -397,14 +416,27 @@ public class LidarDevice {
      * 数组下标范围 左侧 128 * 3 ---- 128 * 5
      * 数组下标范围 右侧 128 * 1 ---- 128 * 3
      */
-    private double LiDing(ArrayList<Integer> data) {
+    private double LiDingLeft(ArrayList<Integer> dataX, ArrayList<Integer> dataY) {
         double dis = 2000;
         for (int i = 128 * 3; i < 128 * 5; i++) {
-            if (data.get(i) > 2000 || data.get(i) < 10)
-                data.set(i, 0);
-            else {
-                if (data.get(i) < dis)
-                    dis = data.get(i);
+            if (dataX.get(i) > 2000 || dataY.get(i) > 1000) {
+                dataX.set(i, 2000);
+            } else {
+                if (dataX.get(i) < dis)
+                    dis = dataX.get(i);
+            }
+        }
+        return dis;
+    }
+
+    private double LiDingRight(ArrayList<Integer> dataX, ArrayList<Integer> dataY) {
+        double dis = 2000;
+        for (int i = 128; i < 128 * 3; i++) {
+            if (dataX.get(i) > 2000 || dataY.get(i) < -1000) {
+                dataX.set(i, 2000);
+            } else {
+                if (dataX.get(i) < dis)
+                    dis = dataX.get(i);
             }
         }
         return dis;

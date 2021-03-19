@@ -24,11 +24,23 @@ public class StartActivity extends Activity {
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             switch (msg.what) {
+                case 43:
+                    /* 调试输出 */
+                    Log.i("mHandler", "-->" + msg.obj.toString());
+                    /* 更新UI */
+                    text_middle.setText(msg.obj.toString());
+                    break;
                 case 44:
                     /* 调试输出 */
                     Log.i("mHandler", "-->" + msg.obj.toString());
                     /* 更新UI */
-                    text_test.setText(msg.obj.toString());
+                    text_left.setText(msg.obj.toString());
+                    break;
+                case 45:
+                    /* 调试输出 */
+                    Log.i("mHandler", "-->" + msg.obj.toString());
+                    /* 更新UI */
+                    text_right.setText(msg.obj.toString());
                     break;
             }
         }
@@ -36,7 +48,9 @@ public class StartActivity extends Activity {
 
     private EditText edit_ip;
     private EditText edit_port;
-    private TextView text_test;
+    private TextView text_middle;
+    private TextView text_left;
+    private TextView text_right;
 
     private LidarDevice lidarDevice = new LidarDevice(handler);
 
@@ -47,7 +61,9 @@ public class StartActivity extends Activity {
 
         edit_ip = (EditText) findViewById(R.id.edit_ip);
         edit_port = (EditText) findViewById(R.id.edit_port);
-        text_test = (TextView) findViewById(R.id.text_test);
+        text_middle = (TextView) findViewById(R.id.text_middle);
+        text_left = (TextView) findViewById(R.id.text_left);
+        text_right = (TextView) findViewById(R.id.text_right);
 
         Button btn_connect = (Button) findViewById(R.id.btn_connect);
         Button btn_disconnect = (Button) findViewById(R.id.btn_disconnect);
