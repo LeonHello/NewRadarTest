@@ -122,8 +122,6 @@ public class StartActivity extends Activity {
 
                 if (lidarDevice.isConnected()) {
 
-                    lidarDevice.getScanFrequency();
-
                     int fre = lidarDevice.getFrequency();
 
                     Log.i("LidarDevice", "雷达扫描频率为" + fre + "Hz");

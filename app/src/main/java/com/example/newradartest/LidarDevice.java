@@ -18,6 +18,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class LidarDevice {
 
@@ -124,20 +125,29 @@ public class LidarDevice {
      * @param PORT
      */
     public void connect(String IPAdr, int PORT) {
-        mThreadPool.execute(new Runnable() {
-            @Override
-            public void run() {
-                if (startTcpConnection(IPAdr, PORT)) {
-                    setConnected(true);
-                    Log.i(TAG, "设备连接成功");
-                    while (isConnected)
-                        handleReader();
-                } else {
-                    setConnected(false);
-                    Log.e(TAG, "设备连接失败");
+        try {
+            mThreadPool.execute(new Runnable() {
+                @Override
+                public void run() {
+                    if (startTcpConnection(IPAdr, PORT)) {
+                        setConnected(true);
+                        Log.i(TAG, "设备连接成功");
+                        // 雷达连接时一直处理输入流
+                        while (isConnected)
+                            handleReader();
+                    } else {
+                        setConnected(false);
+                        Log.e(TAG, "设备连接失败");
+                    }
                 }
-            }
-        });
+            });
+
+            TimeUnit.MILLISECONDS.sleep(10);
+            getScanFrequency();
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
     }
 
@@ -242,7 +252,7 @@ public class LidarDevice {
     /**
      * 获取扫描频率
      */
-    public void getScanFrequency() {
+    private void getScanFrequency() {
         mThreadPool.execute(new Runnable() {
             @Override
             public void run() {
@@ -266,13 +276,11 @@ public class LidarDevice {
             String str;
             int index = 0;
             while ((str = reader.readLine()) != null) {
-                // 当雷达已连接时, 解析常规命令
-                if (isConnected) {
-                    decodeRegularInstruction(str);
-                }
 
-                // 当雷达已连接并且已开始传输数据时, 解析雷达扫描数据并计算距离
-                if (isConnected && isStreamed) {
+                decodeRegularInstruction(str);
+
+                // 当已开始传输数据时, 解析雷达扫描数据并计算距离
+                if (isStreamed) {
                     decodeScanData(str);
 
                     // 将8个block数据组合成一帧, 用于距离计算
@@ -391,20 +399,25 @@ public class LidarDevice {
      * 通过mHandler发送结果至主线程更新UI
      */
     private void updateUI(ArrayList<Integer> dataX, ArrayList<Integer> dataY) {
-        Message msg = mHandler.obtainMessage();
-        msg.what = 43;
-        msg.obj = dataX.get(dataX.size() / 2);
-        mHandler.sendMessage(msg);
 
-        Message msg1 = mHandler.obtainMessage();
-        msg1.what = 44;
-        msg1.obj = LiDingLeft(dataX, dataY);
-        mHandler.sendMessage(msg1);
+        try {
+            Message msg = mHandler.obtainMessage();
+            msg.what = 43;
+            msg.obj = dataX.get(dataX.size() / 2);
+            mHandler.sendMessage(msg);
 
-        Message msg2 = mHandler.obtainMessage();
-        msg2.what = 45;
-        msg2.obj = LiDingRight(dataX, dataY);
-        mHandler.sendMessage(msg2);
+            Message msg1 = mHandler.obtainMessage();
+            msg1.what = 44;
+            msg1.obj = LiDingLeft(dataX, dataY);
+            mHandler.sendMessage(msg1);
+
+            Message msg2 = mHandler.obtainMessage();
+            msg2.what = 45;
+            msg2.obj = LiDingRight(dataX, dataY);
+            mHandler.sendMessage(msg2);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
 
@@ -417,29 +430,48 @@ public class LidarDevice {
      * 数组下标范围 右侧 128 * 1 ---- 128 * 3
      */
     private double LiDingLeft(ArrayList<Integer> dataX, ArrayList<Integer> dataY) {
-        double dis = 2000;
-        for (int i = 128 * 3; i < 128 * 5; i++) {
-            if (dataX.get(i) > 2000 || dataY.get(i) > 1000 || dataX.get(i) <= 0) {
-                dataX.set(i, 2000);
-            } else {
-                if (dataX.get(i) < dis)
-                    dis = dataX.get(i);
+        try {
+            double dis = 2000;
+
+            for (int i = 128 * 3; i < 128 * 5; i++) {
+                if (dataX.get(i) > 2000 || dataY.get(i) > 1000 || dataX.get(i) <= 0) {
+                    dataX.set(i, 2000);
+                } else {
+                    if (dataX.get(i) < dis)
+                        dis = dataX.get(i);
+                }
             }
+
+            return dis;
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        return dis;
+        return -1;
+
     }
 
     private double LiDingRight(ArrayList<Integer> dataX, ArrayList<Integer> dataY) {
-        double dis = 2000;
-        for (int i = 128; i < 128 * 3; i++) {
-            if (dataX.get(i) > 2000 || dataY.get(i) < -1000 || dataX.get(i) <= 0) {
-                dataX.set(i, 2000);
-            } else {
-                if (dataX.get(i) < dis)
-                    dis = dataX.get(i);
+
+        try {
+            double dis = 2000;
+
+            for (int i = 128; i < 128 * 3; i++) {
+                if (dataX.get(i) > 2000 || dataY.get(i) < -1000 || dataX.get(i) <= 0) {
+                    dataX.set(i, 2000);
+                } else {
+                    if (dataX.get(i) < dis)
+                        dis = dataX.get(i);
+                }
             }
+
+            return dis;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
         }
-        return dis;
+        return -1;
+
     }
 
     /**
