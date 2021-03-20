@@ -20,6 +20,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import static com.example.newradartest.CosSinUtil.*;
+
+
 public class LidarDevice {
 
     private final static String TAG = "LidarDevice";
@@ -65,6 +68,8 @@ public class LidarDevice {
     private ArrayList<Integer> frame;
     private ArrayList<Integer> frameDistanceCos;
     private ArrayList<Integer> frameDistanceSin;
+    private double[] cosUtil;
+    private double[] sinUtil;
 
     /**
      * 当前扫描数据对应的block
@@ -114,6 +119,8 @@ public class LidarDevice {
         frame = new ArrayList<>();
         frameDistanceCos = new ArrayList<>();
         frameDistanceSin = new ArrayList<>();
+        cosUtil = cos4;
+        sinUtil = sin4;
         block = -1;
 
     }
@@ -336,6 +343,7 @@ public class LidarDevice {
                         break;
                     case "getScanFrequency":
                         setFrequency(Integer.parseInt(result));
+                        utilCosSin();
                         Log.i(TAG, "getScanFrequency instruction response is " + result);
                         break;
                 }
@@ -378,11 +386,15 @@ public class LidarDevice {
                         // 距离乘以对应cos三角函数转化
                         // rangesByte.length is 192 (96 * 2) when frequency is 30Hz
                         // -135 + block * 33.75 + 33.75 / (rangesByte.length / 2) * (i / 2 + 1)
-                        double angle = -135 + block * 33.75 + 33.75 / (len / 2.0) * (i / 2.0 + 1);
-                        double radian = Math.toRadians(angle);
-                        int distanceCos = (int) (range * Math.cos(radian));
+                        // double angle = -135 + block * 33.75 + 33.75 / (len / 2.0) * (i / 2.0 + 1);
+                        // double radian = Math.toRadians(angle);
+                        // int distanceCos = (int) (range * Math.cos(radian));
+                        // frameDistanceCos.add(distanceCos);
+                        // int distanceSin = (int) (range * Math.sin(radian));
+                        // frameDistanceCos.add(distanceSin);
+                        int distanceCos = (int) (range * cosUtil[block * len / 2 + i / 2]);
                         frameDistanceCos.add(distanceCos);
-                        int distanceSin = (int) (range * Math.sin(radian));
+                        int distanceSin = (int) (range * sinUtil[block * len / 2 + i / 2]);
                         frameDistanceCos.add(distanceSin);
                     }
                 }
@@ -475,49 +487,31 @@ public class LidarDevice {
     }
 
     /**
-     * 通过三角函数计算一帧内所有数据点的距离
+     * 根据扫描频率选择对应cos sin util
      */
-    private void calculate(ArrayList<Integer> data) {
-        switch (frequency) {
-            case 10:
-                Log.i(TAG, "frequency is 10");
-                break;
-            case 15:
-                Log.i(TAG, "frequency is 15");
-                break;
-            case 20:
-                Log.i(TAG, "frequency is 20");
-                break;
-
-            case 25:
-            case 30:
-                Log.i(TAG, "frequency is 25 or 30");
-                break;
-        }
-    }
-
-    /**
-     * 极坐标系到直角坐标系的转化工具
-     */
-    public void util() {
+    public void utilCosSin() {
+        Log.i(TAG, "util of frequency is " + frequency + "Hz");
         switch (frequency) {
             case 10:
                 Log.i(TAG, "frequency is 10Hz");
-                // 288 * 8 cos sin 270
+                cosUtil = cos1;
+                sinUtil = sin1;
                 break;
             case 15:
                 Log.i(TAG, "frequency is 15Hz");
-                // 192 * 8 cos sin 270
+                cosUtil = cos2;
+                sinUtil = sin2;
                 break;
             case 20:
                 Log.i(TAG, "frequency is 20Hz");
-                // 144 * 8 cos sin 270
+                cosUtil = cos3;
+                sinUtil = sin3;
                 break;
             case 25:
             case 30:
                 Log.i(TAG, "frequency is 25Hz or 30Hz");
-                // 96 * 8 cos sin 270
-
+                cosUtil = cos4;
+                sinUtil = sin4;
                 break;
         }
     }
