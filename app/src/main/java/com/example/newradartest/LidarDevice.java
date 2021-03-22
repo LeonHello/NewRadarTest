@@ -490,7 +490,7 @@ public class LidarDevice {
     /**
      * 根据扫描频率选择对应cos sin util
      */
-    public void utilCosSin() {
+    private void utilCosSin() {
         Log.i(TAG, "util of frequency is " + frequency + "Hz");
         switch (frequency) {
             case 10:
