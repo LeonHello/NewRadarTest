@@ -65,7 +65,7 @@ public class LidarDevice {
     /**
      * a frame has 8 blocks, a block has 96 ranges (30Hz for example), frame.length = 8 * 96
      */
-    private ArrayList<Integer> frame;
+    // private ArrayList<Integer> frame;
     private ArrayList<Integer> frameDistanceCos;
     private ArrayList<Integer> frameDistanceSin;
     private double[] cosUtil;
@@ -116,7 +116,7 @@ public class LidarDevice {
 
         mHandler = handler;
 
-        frame = new ArrayList<>();
+        // frame = new ArrayList<>();
         frameDistanceCos = new ArrayList<>();
         frameDistanceSin = new ArrayList<>();
         cosUtil = cos4;
@@ -294,7 +294,7 @@ public class LidarDevice {
                     if (index < 8) {
                         if (block != index) {
                             index = 0;
-                            frame.clear();
+                            // frame.clear();
                             frameDistanceCos.clear();
                             frameDistanceSin.clear();
                             continue;
@@ -303,7 +303,7 @@ public class LidarDevice {
                         if (index == 8) {
                             index = 0;
                             updateUI(frameDistanceCos, frameDistanceSin);
-                            frame.clear();
+                            // frame.clear();
                             frameDistanceCos.clear();
                             frameDistanceSin.clear();
                         }
@@ -382,7 +382,8 @@ public class LidarDevice {
                     for (int i = 0; i < len; i = i + 2) {
                         // range单位转化成1mm
                         int range = ((rangesByte[i] & 0xff) + ((rangesByte[i + 1] & 0xff) << 8)) * 2;
-                        frame.add(range);
+                        // frame.add(range);
+
                         // 距离乘以对应cos三角函数转化
                         // rangesByte.length is 192 (96 * 2) when frequency is 30Hz
                         // -135 + block * 33.75 + 33.75 / (rangesByte.length / 2) * (i / 2 + 1)
