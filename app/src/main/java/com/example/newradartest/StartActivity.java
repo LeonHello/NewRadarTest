@@ -15,6 +15,9 @@ import androidx.annotation.Nullable;
 
 
 public class StartActivity extends Activity {
+
+    private static final String TAG = "StartActivity";
+
     /**
      * 定义Handler对象
      */
@@ -26,19 +29,19 @@ public class StartActivity extends Activity {
             switch (msg.what) {
                 case 43:
                     /* 调试输出 */
-                    Log.i("mHandler", " middle-->" + msg.obj.toString());
+                    Log.i(TAG, " middle-->" + msg.obj.toString());
                     /* 更新UI */
                     text_middle.setText(msg.obj.toString());
                     break;
                 case 44:
                     /* 调试输出 */
-                    Log.i("mHandler", " left-->" + msg.obj.toString());
+                    Log.i(TAG, " left-->" + msg.obj.toString());
                     /* 更新UI */
                     text_left.setText(msg.obj.toString());
                     break;
                 case 45:
                     /* 调试输出 */
-                    Log.i("mHandler", " right-->" + msg.obj.toString());
+                    Log.i(TAG, " right-->" + msg.obj.toString());
                     /* 更新UI */
                     text_right.setText(msg.obj.toString());
                     break;
@@ -48,6 +51,7 @@ public class StartActivity extends Activity {
 
     private EditText edit_ip;
     private EditText edit_port;
+    private TextView radar_state;
     private TextView text_middle;
     private TextView text_left;
     private TextView text_right;
@@ -61,6 +65,7 @@ public class StartActivity extends Activity {
 
         edit_ip = (EditText) findViewById(R.id.edit_ip);
         edit_port = (EditText) findViewById(R.id.edit_port);
+        radar_state = (TextView) findViewById(R.id.radar_state);
         text_middle = (TextView) findViewById(R.id.text_middle);
         text_left = (TextView) findViewById(R.id.text_left);
         text_right = (TextView) findViewById(R.id.text_right);
@@ -81,11 +86,14 @@ public class StartActivity extends Activity {
                     String IPAdr = edit_ip.getText().toString();
                     int PORT = Integer.parseInt(edit_port.getText().toString());
                     lidarDevice.connect(IPAdr, PORT);
+                    radar_state.setText("已连接");
 
+                    Log.i(TAG, "连接雷达成功");
                     Toast.makeText(StartActivity.this, "连接雷达成功", Toast.LENGTH_SHORT).show();
 
                 } else {
 
+                    Log.i(TAG, "雷达已连接");
                     Toast.makeText(StartActivity.this, "雷达已连接", Toast.LENGTH_SHORT).show();
 
                 }
@@ -101,13 +109,15 @@ public class StartActivity extends Activity {
                 if (lidarDevice.isConnected()) {
 
                     /* 断开雷达连接按钮处理函数 */
-                    lidarDevice.stopStreaming();
                     lidarDevice.disconnect();
+                    radar_state.setText("已断开");
 
+                    Log.i(TAG, "与雷达的连接已断开");
                     Toast.makeText(StartActivity.this, "与雷达的连接已断开", Toast.LENGTH_SHORT).show();
 
                 } else {
 
+                    Log.i(TAG, "与雷达的连接已处于断开状态");
                     Toast.makeText(StartActivity.this, "与雷达的连接已处于断开状态", Toast.LENGTH_SHORT).show();
 
                 }
@@ -124,11 +134,12 @@ public class StartActivity extends Activity {
 
                     int fre = lidarDevice.getFrequency();
 
-                    Log.i("LidarDevice", "雷达扫描频率为" + fre + "Hz");
+                    Log.i(TAG, "雷达扫描频率为" + fre + "Hz");
                     Toast.makeText(StartActivity.this, "雷达扫描频率为" + fre + "Hz", Toast.LENGTH_SHORT).show();
 
                 } else {
 
+                    Log.i(TAG, "未与雷达连接");
                     Toast.makeText(StartActivity.this, "未与雷达连接", Toast.LENGTH_SHORT).show();
 
                 }
@@ -145,10 +156,13 @@ public class StartActivity extends Activity {
                 if (lidarDevice.isConnected()) {
 
                     lidarDevice.startStreaming();
+
+                    Log.i(TAG, "成功启动雷达数据传输");
                     Toast.makeText(StartActivity.this, "成功启动雷达数据传输", Toast.LENGTH_SHORT).show();
 
                 } else {
 
+                    Log.i(TAG, "未与雷达连接");
                     Toast.makeText(StartActivity.this, "未与雷达连接", Toast.LENGTH_SHORT).show();
 
                 }
@@ -166,9 +180,12 @@ public class StartActivity extends Activity {
 
                     lidarDevice.stopStreaming();
 
+                    Log.i(TAG, "雷达数据传输已停止");
                     Toast.makeText(StartActivity.this, "雷达数据传输已停止", Toast.LENGTH_SHORT).show();
+
                 } else {
 
+                    Log.i(TAG, "未与雷达连接");
                     Toast.makeText(StartActivity.this, "未与雷达连接", Toast.LENGTH_SHORT).show();
 
                 }

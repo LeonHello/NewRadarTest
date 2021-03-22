@@ -191,6 +191,9 @@ public class LidarDevice {
      */
     public void disconnect() {
         try {
+
+            stopStreaming();
+
             if (writer != null) {
                 writer.close();
                 writer = null;
@@ -222,38 +225,42 @@ public class LidarDevice {
      * 启动数据传输
      */
     public void startStreaming() {
-        mThreadPool.execute(new Runnable() {
-            @Override
-            public void run() {
-                String s = "{\"jsonrpc\":\"2.0\",\"method\":\"scan/startStreaming\",\"id\":\"startStreaming\"}" + "\r\n";
-                try {
-                    writer.write(s);
-                    writer.flush();
-                    Log.i(TAG, "已发送启动数据传输命令: " + s);
-                } catch (IOException e) {
-                    e.printStackTrace();
+        if (!isStreamed) {
+            mThreadPool.execute(new Runnable() {
+                @Override
+                public void run() {
+                    String s = "{\"jsonrpc\":\"2.0\",\"method\":\"scan/startStreaming\",\"id\":\"startStreaming\"}" + "\r\n";
+                    try {
+                        writer.write(s);
+                        writer.flush();
+                        Log.i(TAG, "已发送启动数据传输命令: " + s);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     /**
      * 停止数据传输
      */
     public void stopStreaming() {
-        mThreadPool.execute(new Runnable() {
-            @Override
-            public void run() {
-                String s = "{\"jsonrpc\":\"2.0\",\"method\":\"scan/stopStreaming\",\"id\":\"stopStreaming\"}" + "\r\n";
-                try {
-                    writer.write(s);
-                    writer.flush();
-                    Log.i(TAG, "已发送停止数据传输命令: " + s);
-                } catch (IOException e) {
-                    e.printStackTrace();
+        if (isStreamed) {
+            mThreadPool.execute(new Runnable() {
+                @Override
+                public void run() {
+                    String s = "{\"jsonrpc\":\"2.0\",\"method\":\"scan/stopStreaming\",\"id\":\"stopStreaming\"}" + "\r\n";
+                    try {
+                        writer.write(s);
+                        writer.flush();
+                        Log.i(TAG, "已发送停止数据传输命令: " + s);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     /**
