@@ -149,7 +149,7 @@ public class LidarDevice {
                 }
             });
 
-            TimeUnit.MILLISECONDS.sleep(10);
+            TimeUnit.MILLISECONDS.sleep(500);
             getScanFrequency();
 
         } catch (InterruptedException e) {
@@ -214,6 +214,8 @@ public class LidarDevice {
                 mThreadPool.shutdown();
                 mThreadPool = null;
             }
+
+            setConnected(false);
             Log.i(TAG, "成功断开设备连接");
 
         } catch (IOException e) {
@@ -225,7 +227,7 @@ public class LidarDevice {
      * 启动数据传输
      */
     public void startStreaming() {
-        if (!isStreamed) {
+        if (isConnected && !isStreamed) {
             mThreadPool.execute(new Runnable() {
                 @Override
                 public void run() {
@@ -246,7 +248,7 @@ public class LidarDevice {
      * 停止数据传输
      */
     public void stopStreaming() {
-        if (isStreamed) {
+        if (isConnected && isStreamed) {
             mThreadPool.execute(new Runnable() {
                 @Override
                 public void run() {
@@ -267,19 +269,21 @@ public class LidarDevice {
      * 获取扫描频率
      */
     private void getScanFrequency() {
-        mThreadPool.execute(new Runnable() {
-            @Override
-            public void run() {
-                String s = "{\"jsonrpc\":\"2.0\",\"method\":\"settings/get\",\"params\":{\"entry\":\"scan.frequency\"},\"id\":\"getScanFrequency\"}" + "\r\n";
-                try {
-                    writer.write(s);
-                    writer.flush();
-                    Log.i(TAG, "已发送获取扫描频率命令: " + s);
-                } catch (IOException e) {
-                    e.printStackTrace();
+        if (isConnected) {
+            mThreadPool.execute(new Runnable() {
+                @Override
+                public void run() {
+                    String s = "{\"jsonrpc\":\"2.0\",\"method\":\"settings/get\",\"params\":{\"entry\":\"scan.frequency\"},\"id\":\"getScanFrequency\"}" + "\r\n";
+                    try {
+                        writer.write(s);
+                        writer.flush();
+                        Log.i(TAG, "已发送获取扫描频率命令: " + s);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     /**
