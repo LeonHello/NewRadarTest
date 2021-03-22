@@ -149,7 +149,7 @@ public class LidarDevice {
                 }
             });
 
-            TimeUnit.MILLISECONDS.sleep(500);
+            TimeUnit.MILLISECONDS.sleep(100);
             getScanFrequency();
 
         } catch (InterruptedException e) {
