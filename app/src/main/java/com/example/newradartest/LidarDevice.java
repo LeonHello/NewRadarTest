@@ -63,6 +63,21 @@ public class LidarDevice {
     private Handler mHandler;
 
     /**
+     * 区域限制 横坐标和纵坐标
+     */
+    private int restrictX;
+    private int restrictY;
+
+    public void setRestrictX(int restrictX) {
+        this.restrictX = restrictX;
+    }
+
+    public void setRestrictY(int restrictY) {
+        this.restrictY = restrictY;
+    }
+
+
+    /**
      * a frame has 8 blocks, a block has 96 ranges (30Hz for example), frame.length = 8 * 96
      */
     // private ArrayList<Integer> frame;
@@ -115,6 +130,8 @@ public class LidarDevice {
         mThreadPool = Executors.newFixedThreadPool(cpuNumbers * 5);
 
         mHandler = handler;
+        setRestrictX(0);
+        setRestrictY(0);
 
         // frame = new ArrayList<>();
         frameDistanceCos = new ArrayList<>();
@@ -420,20 +437,19 @@ public class LidarDevice {
     private void updateUI(ArrayList<Integer> dataX, ArrayList<Integer> dataY) {
 
         try {
-            Message msg = mHandler.obtainMessage();
-            msg.what = 43;
-            msg.obj = dataX.get(dataX.size() / 2);
-            mHandler.sendMessage(msg);
 
+            // 左路最小距离
             Message msg1 = mHandler.obtainMessage();
             msg1.what = 44;
-            msg1.obj = LiDingLeft(dataX, dataY);
+            msg1.obj = calMinDistance(dataX, dataY, 3,5, restrictX, restrictY);
             mHandler.sendMessage(msg1);
 
+            // 右路最小距离
             Message msg2 = mHandler.obtainMessage();
             msg2.what = 45;
-            msg2.obj = LiDingRight(dataX, dataY);
+            msg2.obj = calMinDistance(dataX, dataY, 1,3, restrictX, restrictY);
             mHandler.sendMessage(msg2);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -441,16 +457,50 @@ public class LidarDevice {
     }
 
     /**
+     * // leftIndex is 3/6 when calculate left road
+     * // leftIndex is 1/6 when calculate right road
+     * // rightIndex is 5/6 when calculate left road
+     * // rightIndex is 3/6 when calculate right road
+     *
+     * @param dataX 横坐标数据
+     * @param dataY 纵坐标数据
+     * @param leftIndex 3 or 1
+     * @param rightIndex 5 or 3
+     * @param areaX 单位mm
+     * @param areaY 单位mm
+     * @return
+     */
+    private int calMinDistance(ArrayList<Integer> dataX, ArrayList<Integer> dataY, int leftIndex, int rightIndex, int areaX, int areaY) {
+        int minDistance = Math.max(areaX, areaY);
+        int len = dataX.size() / 6;
+
+        try {
+            for (int i = len * leftIndex; i < len * rightIndex; i++) {
+                if (dataX.get(i) >= areaX || Math.abs(dataY.get(i)) >= areaY || dataX.get(i) <= 0) {
+                    dataX.set(i, areaX);
+                } else {
+                    if (dataX.get(i) < minDistance)
+                        minDistance = dataX.get(i);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return minDistance;
+    }
+
+
+    /**
      * 30Hz for example, frameDistance 96 * 8
      * 单路立定跳远 左侧 4 5 block + part of 6 block
      * 单路立定跳远 右侧 2 3 block + part of 1 block
      * when transform to 6 blocks, 96 * 8 / 6 = 128
-     * 数组下标范围 左侧 128 * 3 ---- 128 * 5
-     * 数组下标范围 右侧 128 * 1 ---- 128 * 3
+     * 数组下标范围 左侧 128 * 3 ---- 128 * 5   ----> 3/6 ~ 5/6
+     * 数组下标范围 右侧 128 * 1 ---- 128 * 3   ----> 1/6 ~ 3/6
      */
-    private double LiDingLeft(ArrayList<Integer> dataX, ArrayList<Integer> dataY) {
+    private int LiDingLeft(ArrayList<Integer> dataX, ArrayList<Integer> dataY) {
         try {
-            double dis = 2000;
+            int dis = 2000;
 
             for (int i = 128 * 3; i < 128 * 5; i++) {
                 if (dataX.get(i) > 2000 || dataY.get(i) > 1000 || dataX.get(i) <= 0) {
@@ -469,10 +519,10 @@ public class LidarDevice {
 
     }
 
-    private double LiDingRight(ArrayList<Integer> dataX, ArrayList<Integer> dataY) {
+    private int LiDingRight(ArrayList<Integer> dataX, ArrayList<Integer> dataY) {
 
         try {
-            double dis = 2000;
+            int dis = 2000;
 
             for (int i = 128; i < 128 * 3; i++) {
                 if (dataX.get(i) > 2000 || dataY.get(i) < -1000 || dataX.get(i) <= 0) {
