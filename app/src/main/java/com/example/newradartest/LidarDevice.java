@@ -132,29 +132,23 @@ public class LidarDevice {
      * @param PORT
      */
     public void connect(String IPAdr, int PORT) {
-        try {
-            mThreadPool.execute(new Runnable() {
-                @Override
-                public void run() {
-                    if (startTcpConnection(IPAdr, PORT)) {
-                        setConnected(true);
-                        Log.i(TAG, "设备连接成功");
-                        // 雷达连接时一直处理输入流
-                        while (isConnected)
-                            handleReader();
-                    } else {
-                        setConnected(false);
-                        Log.e(TAG, "设备连接失败");
-                    }
+        mThreadPool.execute(new Runnable() {
+            @Override
+            public void run() {
+                if (startTcpConnection(IPAdr, PORT)) {
+                    setConnected(true);
+                    Log.i(TAG, "设备连接成功");
+                    // 雷达连接时一直处理输入流
+                    while (isConnected)
+                        handleReader();
+                } else {
+                    setConnected(false);
+                    Log.e(TAG, "设备连接失败");
                 }
-            });
+            }
+        });
 
-            TimeUnit.MILLISECONDS.sleep(100);
-            getScanFrequency();
-
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        getScanFrequency();
 
     }
 
@@ -275,10 +269,11 @@ public class LidarDevice {
                 public void run() {
                     String s = "{\"jsonrpc\":\"2.0\",\"method\":\"settings/get\",\"params\":{\"entry\":\"scan.frequency\"},\"id\":\"getScanFrequency\"}" + "\r\n";
                     try {
+                        TimeUnit.MILLISECONDS.sleep(300);
                         writer.write(s);
                         writer.flush();
                         Log.i(TAG, "已发送获取扫描频率命令: " + s);
-                    } catch (IOException e) {
+                    } catch (IOException | InterruptedException e) {
                         e.printStackTrace();
                     }
                 }
@@ -354,7 +349,7 @@ public class LidarDevice {
                         break;
                     case "getScanFrequency":
                         setFrequency(Integer.parseInt(result));
-                        utilCosSin();
+                        utilCosSin(Integer.parseInt(result));
                         Log.i(TAG, "getScanFrequency instruction response is " + result);
                         break;
                 }
@@ -501,27 +496,23 @@ public class LidarDevice {
     /**
      * 根据扫描频率选择对应cos sin util
      */
-    private void utilCosSin() {
-        Log.i(TAG, "util of frequency is " + frequency + "Hz");
-        switch (frequency) {
+    private void utilCosSin(int fre) {
+        Log.i(TAG, "cos/sin util of frequency is " + fre + "Hz");
+        switch (fre) {
             case 10:
-                Log.i(TAG, "frequency is 10Hz");
                 cosUtil = cos1;
                 sinUtil = sin1;
                 break;
             case 15:
-                Log.i(TAG, "frequency is 15Hz");
                 cosUtil = cos2;
                 sinUtil = sin2;
                 break;
             case 20:
-                Log.i(TAG, "frequency is 20Hz");
                 cosUtil = cos3;
                 sinUtil = sin3;
                 break;
             case 25:
             case 30:
-                Log.i(TAG, "frequency is 25Hz or 30Hz");
                 cosUtil = cos4;
                 sinUtil = sin4;
                 break;
