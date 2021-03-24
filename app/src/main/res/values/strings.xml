@@ -9,9 +9,9 @@
     <string name="edit_port">2105</string>
     <string name="btn_connect">连接雷达</string>
     <string name="btn_disconnect">断开雷达</string>
-    <string name="btn_startStreaming">启动数据传输</string>
-    <string name="btn_stopStreaming">停止数据传输</string>
-    <string name="btn_getScanFrequency">获取雷达频率</string>
+    <string name="btn_startStreaming">开始测量</string>
+    <string name="btn_stopStreaming">停止测量</string>
+    <string name="btn_getScanFrequency">查看雷达扫描频率</string>
     <string name="text_radar">雷达状态:</string>
     <string name="text_radar_state">已断开</string>
 </resources>

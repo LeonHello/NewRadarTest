@@ -27,12 +27,12 @@ public class StartActivity extends Activity {
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             switch (msg.what) {
-                case 43:
-                    /* 调试输出 */
-                    Log.i(TAG, " middle-->" + msg.obj.toString());
-                    /* 更新UI */
-                    text_middle.setText(msg.obj.toString());
-                    break;
+//                case 43:
+//                    /* 调试输出 */
+//                    Log.i(TAG, " middle-->" + msg.obj.toString());
+//                    /* 更新UI */
+//                    text_middle.setText(msg.obj.toString());
+//                    break;
                 case 44:
                     /* 调试输出 */
                     Log.i(TAG, " left-->" + msg.obj.toString());
@@ -51,8 +51,12 @@ public class StartActivity extends Activity {
 
     private EditText edit_ip;
     private EditText edit_port;
+
     private TextView radar_state;
-    private TextView text_middle;
+    private EditText edit_area_x;
+    private EditText edit_area_y;
+
+    //    private TextView text_middle;
     private TextView text_left;
     private TextView text_right;
 
@@ -65,8 +69,12 @@ public class StartActivity extends Activity {
 
         edit_ip = (EditText) findViewById(R.id.edit_ip);
         edit_port = (EditText) findViewById(R.id.edit_port);
+
         radar_state = (TextView) findViewById(R.id.radar_state);
-        text_middle = (TextView) findViewById(R.id.text_middle);
+        edit_area_x = (EditText) findViewById(R.id.edit_area_x);
+        edit_area_y = (EditText) findViewById(R.id.edit_area_y);
+
+//        text_middle = (TextView) findViewById(R.id.text_middle);
         text_left = (TextView) findViewById(R.id.text_left);
         text_right = (TextView) findViewById(R.id.text_right);
 
@@ -81,22 +89,27 @@ public class StartActivity extends Activity {
             @Override
             public void onClick(View v) {
 
-                if (!lidarDevice.isConnected()) {
-                    /* 连接按钮处理函数 */
-                    String IPAdr = edit_ip.getText().toString();
-                    int PORT = Integer.parseInt(edit_port.getText().toString());
-                    lidarDevice.connect(IPAdr, PORT);
-                    radar_state.setText("已连接");
+                try {
+                    if (!lidarDevice.isConnected()) {
+                        /* 连接按钮处理函数 */
+                        String IPAdr = edit_ip.getText().toString();
+                        int PORT = Integer.parseInt(edit_port.getText().toString());
+                        lidarDevice.connect(IPAdr, PORT);
+                        radar_state.setText("已连接");
 
-                    Log.i(TAG, "连接雷达成功");
-                    Toast.makeText(StartActivity.this, "连接雷达成功", Toast.LENGTH_SHORT).show();
+                        Log.i(TAG, "连接雷达成功");
+                        Toast.makeText(StartActivity.this, "连接雷达成功", Toast.LENGTH_SHORT).show();
 
-                } else {
+                    } else {
 
-                    Log.i(TAG, "雷达已连接");
-                    Toast.makeText(StartActivity.this, "雷达已连接", Toast.LENGTH_SHORT).show();
+                        Log.i(TAG, "雷达已连接");
+                        Toast.makeText(StartActivity.this, "雷达已连接", Toast.LENGTH_SHORT).show();
 
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
+
 
             }
         });
@@ -106,89 +119,124 @@ public class StartActivity extends Activity {
             @Override
             public void onClick(View v) {
 
-                if (lidarDevice.isConnected()) {
+                try {
+                    if (lidarDevice.isConnected()) {
 
-                    /* 断开雷达连接按钮处理函数 */
-                    lidarDevice.disconnect();
-                    radar_state.setText("已断开");
+                        /* 断开雷达连接按钮处理函数 */
+                        lidarDevice.disconnect();
+                        radar_state.setText("已断开");
 
-                    Log.i(TAG, "与雷达的连接已断开");
-                    Toast.makeText(StartActivity.this, "与雷达的连接已断开", Toast.LENGTH_SHORT).show();
+                        Log.i(TAG, "与雷达的连接已断开");
+                        Toast.makeText(StartActivity.this, "与雷达的连接已断开", Toast.LENGTH_SHORT).show();
 
-                } else {
+                    } else {
 
-                    Log.i(TAG, "与雷达的连接已处于断开状态");
-                    Toast.makeText(StartActivity.this, "与雷达的连接已处于断开状态", Toast.LENGTH_SHORT).show();
+                        Log.i(TAG, "与雷达的连接已处于断开状态");
+                        Toast.makeText(StartActivity.this, "与雷达的连接已处于断开状态", Toast.LENGTH_SHORT).show();
 
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
+
 
             }
         });
 
-        /* 获取雷达扫描频率按钮 */
+        /* 查看雷达扫描频率按钮 */
         btn_getScanFrequency.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                if (lidarDevice.isConnected()) {
+                try {
+                    if (lidarDevice.isConnected()) {
 
-                    int fre = lidarDevice.getFrequency();
+                        int fre = lidarDevice.getFrequency();
 
-                    Log.i(TAG, "雷达扫描频率为" + fre + "Hz");
-                    Toast.makeText(StartActivity.this, "雷达扫描频率为" + fre + "Hz", Toast.LENGTH_SHORT).show();
+                        Log.i(TAG, "雷达扫描频率为" + fre + "Hz");
+                        Toast.makeText(StartActivity.this, "雷达扫描频率为" + fre + "Hz", Toast.LENGTH_SHORT).show();
 
-                } else {
+                    } else {
 
-                    Log.i(TAG, "未与雷达连接");
-                    Toast.makeText(StartActivity.this, "未与雷达连接", Toast.LENGTH_SHORT).show();
+                        Log.i(TAG, "未与雷达连接");
+                        Toast.makeText(StartActivity.this, "未与雷达连接", Toast.LENGTH_SHORT).show();
 
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
+
 
             }
         });
 
 
-        /* 启动雷达数据传输按钮 */
+        /* 启动雷达数据传输按钮 || 开始测量按钮 */
         btn_startStreaming.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                if (lidarDevice.isConnected()) {
+                try {
+                    if (lidarDevice.isConnected()) {
 
-                    lidarDevice.startStreaming();
+                        int areaX = Integer.parseInt(edit_area_x.getText().toString());
+                        int areaY = Integer.parseInt(edit_area_y.getText().toString());
 
-                    Log.i(TAG, "成功启动雷达数据传输");
-                    Toast.makeText(StartActivity.this, "成功启动雷达数据传输", Toast.LENGTH_SHORT).show();
+                        if (areaX > 0 && areaY > 0) {
 
-                } else {
+                            lidarDevice.setRestrictX(areaX);
+                            lidarDevice.setRestrictY(areaY);
 
-                    Log.i(TAG, "未与雷达连接");
-                    Toast.makeText(StartActivity.this, "未与雷达连接", Toast.LENGTH_SHORT).show();
+                            lidarDevice.startStreaming();
 
+                            Log.i(TAG, "启动雷达数据传输并开始测量");
+                            Toast.makeText(StartActivity.this, "启动雷达数据传输并开始测量", Toast.LENGTH_SHORT).show();
+
+                        } else {
+
+                            Log.i(TAG, "请输入正确的横向与纵向限制距离");
+                            Toast.makeText(StartActivity.this, "请输入正确的横向与纵向限制距离", Toast.LENGTH_SHORT).show();
+
+                        }
+
+                    } else {
+
+                        Log.i(TAG, "未与雷达连接");
+                        Toast.makeText(StartActivity.this, "未与雷达连接", Toast.LENGTH_SHORT).show();
+
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
+
 
             }
         });
 
 
-        /* 停止雷达数据传输按钮 */
+        /* 停止雷达数据传输按钮 || 停止测量按钮 */
         btn_stopStreaming.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                if (lidarDevice.isConnected()) {
+                try {
+                    if (lidarDevice.isConnected()) {
 
-                    lidarDevice.stopStreaming();
+                        lidarDevice.stopStreaming();
 
-                    Log.i(TAG, "雷达数据传输已停止");
-                    Toast.makeText(StartActivity.this, "雷达数据传输已停止", Toast.LENGTH_SHORT).show();
+                        Log.i(TAG, "停止雷达数据传输并停止测量");
+                        Toast.makeText(StartActivity.this, "停止雷达数据传输并停止测量", Toast.LENGTH_SHORT).show();
 
-                } else {
+                    } else {
 
-                    Log.i(TAG, "未与雷达连接");
-                    Toast.makeText(StartActivity.this, "未与雷达连接", Toast.LENGTH_SHORT).show();
+                        Log.i(TAG, "未与雷达连接");
+                        Toast.makeText(StartActivity.this, "未与雷达连接", Toast.LENGTH_SHORT).show();
 
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
+
 
             }
         });

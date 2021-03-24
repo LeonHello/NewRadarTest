@@ -123,7 +123,7 @@ public class LidarDevice {
 
         setConnected(false);
         setStreamed(false);
-        setFrequency(-1);
+        setFrequency(0);
 
         int cpuNumbers = Runtime.getRuntime().availableProcessors();
         // 根据CPU数目初始化线程池
@@ -136,8 +136,8 @@ public class LidarDevice {
         // frame = new ArrayList<>();
         frameDistanceCos = new ArrayList<>();
         frameDistanceSin = new ArrayList<>();
-        cosUtil = cos4;
-        sinUtil = sin4;
+        cosUtil = new double[]{};
+        sinUtil = new double[]{};
         block = -1;
 
     }
@@ -152,16 +152,22 @@ public class LidarDevice {
         mThreadPool.execute(new Runnable() {
             @Override
             public void run() {
-                if (startTcpConnection(IPAdr, PORT)) {
-                    setConnected(true);
-                    Log.i(TAG, "设备连接成功");
-                    // 雷达连接时一直处理输入流
-                    while (isConnected)
-                        handleReader();
-                } else {
-                    setConnected(false);
-                    Log.e(TAG, "设备连接失败");
+
+                try {
+                    if (startTcpConnection(IPAdr, PORT)) {
+                        setConnected(true);
+                        Log.i(TAG, "设备连接成功");
+                        // 雷达连接时一直处理输入流
+                        while (isConnected)
+                            handleReader();
+                    } else {
+                        setConnected(false);
+                        Log.e(TAG, "设备连接失败");
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
+
             }
         });
 
@@ -365,8 +371,8 @@ public class LidarDevice {
                         Log.i(TAG, "stopStreaming instruction response is " + result);
                         break;
                     case "getScanFrequency":
-                        setFrequency(Integer.parseInt(result));
                         utilCosSin(Integer.parseInt(result));
+                        setFrequency(Integer.parseInt(result));
                         Log.i(TAG, "getScanFrequency instruction response is " + result);
                         break;
                 }
@@ -441,13 +447,13 @@ public class LidarDevice {
             // 左路最小距离
             Message msg1 = mHandler.obtainMessage();
             msg1.what = 44;
-            msg1.obj = calMinDistance(dataX, dataY, 3,5, restrictX, restrictY);
+            msg1.obj = calMinDistance(dataX, dataY, 3, 5, restrictX, restrictY);
             mHandler.sendMessage(msg1);
 
             // 右路最小距离
             Message msg2 = mHandler.obtainMessage();
             msg2.what = 45;
-            msg2.obj = calMinDistance(dataX, dataY, 1,3, restrictX, restrictY);
+            msg2.obj = calMinDistance(dataX, dataY, 1, 3, restrictX, restrictY);
             mHandler.sendMessage(msg2);
 
         } catch (Exception e) {
@@ -462,15 +468,16 @@ public class LidarDevice {
      * // rightIndex is 5/6 when calculate left road
      * // rightIndex is 3/6 when calculate right road
      *
-     * @param dataX 横坐标数据
-     * @param dataY 纵坐标数据
-     * @param leftIndex 3 or 1
+     * @param dataX      横坐标数据
+     * @param dataY      纵坐标数据
+     * @param leftIndex  3 or 1
      * @param rightIndex 5 or 3
-     * @param areaX 单位mm
-     * @param areaY 单位mm
+     * @param areaX      单位mm
+     * @param areaY      单位mm
      * @return
      */
     private int calMinDistance(ArrayList<Integer> dataX, ArrayList<Integer> dataY, int leftIndex, int rightIndex, int areaX, int areaY) {
+
         int minDistance = Math.max(areaX, areaY);
         int len = dataX.size() / 6;
 
@@ -486,7 +493,9 @@ public class LidarDevice {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         return minDistance;
+
     }
 
 
