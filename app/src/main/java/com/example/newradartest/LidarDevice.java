@@ -426,7 +426,7 @@ public class LidarDevice {
                         // frameDistanceCos.add(distanceCos);
                         // int distanceSin = (int) (range * Math.sin(radian));
                         // frameDistanceCos.add(distanceSin);
-                        int index =  block * len / 2 + i / 2;
+                        int index = block * len / 2 + i / 2;
                         int distanceCos = (int) (range * cosUtil.get(index));
                         frameDistanceCos.add(distanceCos);
                         int distanceSin = (int) (range * sinUtil.get(index));
@@ -567,61 +567,47 @@ public class LidarDevice {
      */
     private void utilCosSin(int fre) {
         Log.i(TAG, "cos/sin util of frequency is " + fre + "Hz");
+        ArrayList<ArrayList<Double>> res = new ArrayList<>();
         switch (fre) {
             case 10:
-                cosUtil = calCos(288);
-                sinUtil = calSin(288);
+                res = calCosSin(288);
                 break;
             case 15:
-                cosUtil = calCos(192);
-                sinUtil = calSin(192);
+                res = calCosSin(192);
                 break;
             case 20:
-                cosUtil = calCos(144);
-                sinUtil = calSin(144);
+                res = calCosSin(144);
                 break;
             case 25:
             case 30:
-                cosUtil = calCos(96);
-                sinUtil = calSin(96);
+                res = calCosSin(96);
                 break;
         }
+        cosUtil = res.get(0);
+        sinUtil = res.get(1);
     }
 
     /**
-     * 根据频率对应的长度来计算cos
+     * 根据频率对应的长度来计算 cos sin
      *
      * @param len
      * @return
      */
-    private ArrayList<Double> calCos(int len) {
+    private ArrayList<ArrayList<Double>> calCosSin(int len) {
+        ArrayList<ArrayList<Double>> res = new ArrayList<>();
         ArrayList<Double> cosList = new ArrayList<>();
-        for (int block = 0; block < 8; block++) {
-            for (int i = 0; i < len; i++) {
-                double angle = -135 + block * 33.75 + 33.75 / len * (i + 1);
-                double radian = Math.toRadians(angle);
-                cosList.add(Math.cos(radian));
-            }
-        }
-        return cosList;
-    }
-
-    /**
-     * 根据频率对应的长度来计算sin
-     *
-     * @param len
-     * @return
-     */
-    private ArrayList<Double> calSin(int len) {
         ArrayList<Double> sinList = new ArrayList<>();
         for (int block = 0; block < 8; block++) {
             for (int i = 0; i < len; i++) {
                 double angle = -135 + block * 33.75 + 33.75 / len * (i + 1);
                 double radian = Math.toRadians(angle);
+                cosList.add(Math.cos(radian));
                 sinList.add(Math.sin(radian));
             }
         }
-        return sinList;
+        res.add(cosList);
+        res.add(sinList);
+        return res;
     }
 
 }
