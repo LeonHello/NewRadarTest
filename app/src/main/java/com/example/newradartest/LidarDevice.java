@@ -426,9 +426,10 @@ public class LidarDevice {
                         // frameDistanceCos.add(distanceCos);
                         // int distanceSin = (int) (range * Math.sin(radian));
                         // frameDistanceCos.add(distanceSin);
-                        int distanceCos = (int) (range * cosUtil.get(block * len / 2 + i / 2));
+                        int index =  block * len / 2 + i / 2;
+                        int distanceCos = (int) (range * cosUtil.get(index));
                         frameDistanceCos.add(distanceCos);
-                        int distanceSin = (int) (range * sinUtil.get(block * len / 2 + i / 2));
+                        int distanceSin = (int) (range * sinUtil.get(index));
                         frameDistanceCos.add(distanceSin);
                     }
                 }
