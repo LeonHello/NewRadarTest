@@ -20,8 +20,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static com.example.newradartest.CosSinUtil.*;
-
 
 public class LidarDevice {
 
@@ -83,8 +81,8 @@ public class LidarDevice {
     // private ArrayList<Integer> frame;
     private ArrayList<Integer> frameDistanceCos;
     private ArrayList<Integer> frameDistanceSin;
-    private double[] cosUtil;
-    private double[] sinUtil;
+    private ArrayList<Double> cosUtil;
+    private ArrayList<Double> sinUtil;
 
     /**
      * 当前扫描数据对应的block
@@ -136,8 +134,8 @@ public class LidarDevice {
         // frame = new ArrayList<>();
         frameDistanceCos = new ArrayList<>();
         frameDistanceSin = new ArrayList<>();
-        cosUtil = new double[]{};
-        sinUtil = new double[]{};
+        cosUtil = new ArrayList<>();
+        sinUtil = new ArrayList<>();
         block = -1;
 
     }
@@ -290,6 +288,8 @@ public class LidarDevice {
             mThreadPool.execute(new Runnable() {
                 @Override
                 public void run() {
+                    cosUtil.clear();
+                    sinUtil.clear();
                     String s = "{\"jsonrpc\":\"2.0\",\"method\":\"settings/get\",\"params\":{\"entry\":\"scan.frequency\"},\"id\":\"getScanFrequency\"}" + "\r\n";
                     try {
                         TimeUnit.MILLISECONDS.sleep(300);
@@ -350,6 +350,8 @@ public class LidarDevice {
     /**
      * 解析json-rpc格式数据
      * 解析常规命令
+     *
+     * @param str
      */
     private void decodeRegularInstruction(String str) {
         try {
@@ -387,6 +389,8 @@ public class LidarDevice {
     /**
      * 解析json-rpc格式数据
      * 解析雷达扫描数据
+     *
+     * @param str
      */
     private void decodeScanData(String str) {
         try {
@@ -422,9 +426,9 @@ public class LidarDevice {
                         // frameDistanceCos.add(distanceCos);
                         // int distanceSin = (int) (range * Math.sin(radian));
                         // frameDistanceCos.add(distanceSin);
-                        int distanceCos = (int) (range * cosUtil[block * len / 2 + i / 2]);
+                        int distanceCos = (int) (range * cosUtil.get(block * len / 2 + i / 2));
                         frameDistanceCos.add(distanceCos);
-                        int distanceSin = (int) (range * sinUtil[block * len / 2 + i / 2]);
+                        int distanceSin = (int) (range * sinUtil.get(block * len / 2 + i / 2));
                         frameDistanceCos.add(distanceSin);
                     }
                 }
@@ -439,6 +443,9 @@ public class LidarDevice {
     /**
      * 一帧数据计算距离
      * 通过mHandler发送结果至主线程更新UI
+     *
+     * @param dataX
+     * @param dataY
      */
     private void updateUI(ArrayList<Integer> dataX, ArrayList<Integer> dataY) {
 
@@ -554,28 +561,66 @@ public class LidarDevice {
 
     /**
      * 根据扫描频率选择对应cos sin util
+     *
+     * @param fre
      */
     private void utilCosSin(int fre) {
         Log.i(TAG, "cos/sin util of frequency is " + fre + "Hz");
         switch (fre) {
             case 10:
-                cosUtil = cos1;
-                sinUtil = sin1;
+                cosUtil = calCos(288);
+                sinUtil = calSin(288);
                 break;
             case 15:
-                cosUtil = cos2;
-                sinUtil = sin2;
+                cosUtil = calCos(192);
+                sinUtil = calSin(192);
                 break;
             case 20:
-                cosUtil = cos3;
-                sinUtil = sin3;
+                cosUtil = calCos(144);
+                sinUtil = calSin(144);
                 break;
             case 25:
             case 30:
-                cosUtil = cos4;
-                sinUtil = sin4;
+                cosUtil = calCos(96);
+                sinUtil = calSin(96);
                 break;
         }
+    }
+
+    /**
+     * 根据频率对应的长度来计算cos
+     *
+     * @param len
+     * @return
+     */
+    private ArrayList<Double> calCos(int len) {
+        ArrayList<Double> cosList = new ArrayList<>();
+        for (int block = 0; block < 8; block++) {
+            for (int i = 0; i < len; i++) {
+                double angle = -135 + block * 33.75 + 33.75 / len * (i + 1);
+                double radian = Math.toRadians(angle);
+                cosList.add(Math.cos(radian));
+            }
+        }
+        return cosList;
+    }
+
+    /**
+     * 根据频率对应的长度来计算sin
+     *
+     * @param len
+     * @return
+     */
+    private ArrayList<Double> calSin(int len) {
+        ArrayList<Double> sinList = new ArrayList<>();
+        for (int block = 0; block < 8; block++) {
+            for (int i = 0; i < len; i++) {
+                double angle = -135 + block * 33.75 + 33.75 / len * (i + 1);
+                double radian = Math.toRadians(angle);
+                sinList.add(Math.sin(radian));
+            }
+        }
+        return sinList;
     }
 
 }
