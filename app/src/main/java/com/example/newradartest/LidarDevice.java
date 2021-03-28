@@ -43,6 +43,10 @@ public class LidarDevice {
      */
     private boolean isConnected;
     /**
+     * 是否常规命令
+     */
+    private boolean isRegIns;
+    /**
      * 是否开始数据传输
      */
     private boolean isStreamed;
@@ -98,6 +102,10 @@ public class LidarDevice {
         isConnected = connected;
     }
 
+    public void setRegIns(boolean regIns) {
+        isRegIns = regIns;
+    }
+
     private void setStreamed(boolean streamed) {
         isStreamed = streamed;
     }
@@ -120,6 +128,7 @@ public class LidarDevice {
         reader = null;
 
         setConnected(false);
+        setRegIns(false);
         setStreamed(false);
         setFrequency(0);
 
@@ -218,10 +227,6 @@ public class LidarDevice {
                 reader = null;
             }
             if (socket != null) {
-                socket.shutdownInput();
-                socket.shutdownOutput();
-                socket.getInputStream().close();
-                socket.getOutputStream().close();
                 socket.close();
                 socket = null;
             }
@@ -248,10 +253,12 @@ public class LidarDevice {
                 public void run() {
                     String s = "{\"jsonrpc\":\"2.0\",\"method\":\"scan/startStreaming\",\"id\":\"startStreaming\"}" + "\r\n";
                     try {
+                        setRegIns(true);
                         writer.write(s);
                         writer.flush();
                         Log.i(TAG, "已发送启动数据传输命令: " + s);
                     } catch (IOException e) {
+                        setRegIns(false);
                         e.printStackTrace();
                     }
                 }
@@ -269,10 +276,12 @@ public class LidarDevice {
                 public void run() {
                     String s = "{\"jsonrpc\":\"2.0\",\"method\":\"scan/stopStreaming\",\"id\":\"stopStreaming\"}" + "\r\n";
                     try {
+                        setRegIns(true);
                         writer.write(s);
                         writer.flush();
                         Log.i(TAG, "已发送停止数据传输命令: " + s);
                     } catch (IOException e) {
+                        setRegIns(false);
                         e.printStackTrace();
                     }
                 }
@@ -293,10 +302,12 @@ public class LidarDevice {
                     String s = "{\"jsonrpc\":\"2.0\",\"method\":\"settings/get\",\"params\":{\"entry\":\"scan.frequency\"},\"id\":\"getScanFrequency\"}" + "\r\n";
                     try {
                         TimeUnit.MILLISECONDS.sleep(300);
+                        setRegIns(true);
                         writer.write(s);
                         writer.flush();
                         Log.i(TAG, "已发送获取扫描频率命令: " + s);
                     } catch (IOException | InterruptedException e) {
+                        setRegIns(false);
                         e.printStackTrace();
                     }
                 }
@@ -313,10 +324,13 @@ public class LidarDevice {
             int index = 0;
             while ((str = reader.readLine()) != null) {
 
-                decodeRegularInstruction(str);
+                // 当发送了常规指令时进行解析
+                if (isRegIns) {
+                    decodeRegularInstruction(str);
+                }
 
                 // 当已开始传输数据时, 解析雷达扫描数据并计算距离
-                if (isStreamed) {
+                if (!isRegIns && isStreamed) {
                     decodeScanData(str);
 
                     // 将8个block数据组合成一帧, 用于距离计算
@@ -366,15 +380,18 @@ public class LidarDevice {
                 switch (id) {
                     case "startStreaming":
                         if (Integer.parseInt(result) == 0) setStreamed(true);
+                        setRegIns(false);
                         Log.i(TAG, "startStreaming instruction response is " + result);
                         break;
                     case "stopStreaming":
                         if (Integer.parseInt(result) == 0) setStreamed(false);
+                        setRegIns(false);
                         Log.i(TAG, "stopStreaming instruction response is " + result);
                         break;
                     case "getScanFrequency":
                         utilCosSin(Integer.parseInt(result));
                         setFrequency(Integer.parseInt(result));
+                        setRegIns(false);
                         Log.i(TAG, "getScanFrequency instruction response is " + result);
                         break;
                 }
