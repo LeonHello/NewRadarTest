@@ -71,11 +71,11 @@ public class LidarDevice {
     private int restrictY;
 
     public void setRestrictX(int restrictX) {
-        this.restrictX = restrictX;
+        this.restrictX = Math.abs(restrictX);
     }
 
     public void setRestrictY(int restrictY) {
-        this.restrictY = restrictY;
+        this.restrictY = Math.abs(restrictY);
     }
 
 
@@ -504,12 +504,13 @@ public class LidarDevice {
     private int calMinDistance(ArrayList<Integer> dataX, ArrayList<Integer> dataY, int leftIndex, int rightIndex, int areaX, int areaY) {
 
         int minDistance = Math.max(areaX, areaY);
+        int max = minDistance;
         int len = dataX.size() / 6;
 
         try {
             for (int i = len * leftIndex; i < len * rightIndex; i++) {
                 if (dataX.get(i) >= areaX || Math.abs(dataY.get(i)) >= areaY || dataX.get(i) <= 0) {
-                    dataX.set(i, areaX);
+                    dataX.set(i, max);
                 } else {
                     if (dataX.get(i) < minDistance)
                         minDistance = dataX.get(i);
