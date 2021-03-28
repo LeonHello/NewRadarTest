@@ -504,7 +504,7 @@ public class LidarDevice {
     private int calMinDistance(ArrayList<Integer> dataX, ArrayList<Integer> dataY, int leftIndex, int rightIndex, int areaX, int areaY) {
 
         int minDistance = Math.max(areaX, areaY);
-        int max = minDistance;
+        int max = Math.max(areaX, areaY);
         int len = dataX.size() / 6;
 
         try {
