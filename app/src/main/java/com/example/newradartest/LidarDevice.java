@@ -293,26 +293,24 @@ public class LidarDevice {
      * 获取扫描频率
      */
     private void getScanFrequency() {
-        if (isConnected) {
-            mThreadPool.execute(new Runnable() {
-                @Override
-                public void run() {
-                    cosUtil.clear();
-                    sinUtil.clear();
-                    String s = "{\"jsonrpc\":\"2.0\",\"method\":\"settings/get\",\"params\":{\"entry\":\"scan.frequency\"},\"id\":\"getScanFrequency\"}" + "\r\n";
-                    try {
-                        TimeUnit.MILLISECONDS.sleep(300);
-                        setRegIns(true);
-                        writer.write(s);
-                        writer.flush();
-                        Log.i(TAG, "已发送获取扫描频率命令: " + s);
-                    } catch (IOException | InterruptedException e) {
-                        setRegIns(false);
-                        e.printStackTrace();
-                    }
+        mThreadPool.execute(new Runnable() {
+            @Override
+            public void run() {
+                cosUtil.clear();
+                sinUtil.clear();
+                String s = "{\"jsonrpc\":\"2.0\",\"method\":\"settings/get\",\"params\":{\"entry\":\"scan.frequency\"},\"id\":\"getScanFrequency\"}" + "\r\n";
+                try {
+                    TimeUnit.MILLISECONDS.sleep(100);
+                    setRegIns(true);
+                    writer.write(s);
+                    writer.flush();
+                    Log.i(TAG, "已发送获取扫描频率命令: " + s);
+                } catch (IOException | InterruptedException e) {
+                    setRegIns(false);
+                    e.printStackTrace();
                 }
-            });
-        }
+            }
+        });
     }
 
     /**
@@ -447,7 +445,7 @@ public class LidarDevice {
                         int distanceCos = (int) (range * cosUtil.get(index));
                         frameDistanceCos.add(distanceCos);
                         int distanceSin = (int) (range * sinUtil.get(index));
-                        frameDistanceCos.add(distanceSin);
+                        frameDistanceSin.add(distanceSin);
                     }
                 }
             }
