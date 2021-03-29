@@ -165,8 +165,8 @@ public class LidarDevice {
                         setConnected(true);
                         Log.i(TAG, "设备连接成功");
                         // 雷达连接时一直处理输入流
-                        while (isConnected)
-                            handleReader();
+                        // while (isConnected)
+                        handleReader();
                     } else {
                         setConnected(false);
                         Log.e(TAG, "设备连接失败");
