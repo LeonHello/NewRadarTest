@@ -319,7 +319,7 @@ public class LidarDevice {
     private void handleReader() {
         try {
             String str;
-            int index = 0;
+            int index = 1;
             while ((str = reader.readLine()) != null) {
 
                 // 当发送了常规指令时进行解析
@@ -332,17 +332,18 @@ public class LidarDevice {
                     decodeScanData(str);
 
                     // 将8个block数据组合成一帧, 用于距离计算
-                    if (index < 8) {
+                    if (index < 7) {
                         if (block != index) {
-                            index = 0;
+                            // Log.i(TAG, "LossPackage");
+                            index = 1;
                             // frame.clear();
                             frameDistanceCos.clear();
                             frameDistanceSin.clear();
                             continue;
                         }
                         index++;
-                        if (index == 8) {
-                            index = 0;
+                        if (index == 7) {
+                            index = 1;
                             updateUI(frameDistanceCos, frameDistanceSin);
                             // frame.clear();
                             frameDistanceCos.clear();
