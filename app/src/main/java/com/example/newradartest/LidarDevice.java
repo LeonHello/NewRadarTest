@@ -236,6 +236,7 @@ public class LidarDevice {
             }
 
             setConnected(false);
+            setStreamed(false);
             Log.i(TAG, "成功断开设备连接");
 
         } catch (IOException e) {
