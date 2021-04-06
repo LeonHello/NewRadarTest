@@ -218,16 +218,27 @@ public class LidarDevice {
 
             stopStreaming();
 
-            if (writer != null) {
-                writer.close();
-                writer = null;
-            }
-            if (reader != null) {
-                reader.close();
-                reader = null;
-            }
+            setConnected(false);
+            setStreamed(false);
+            setRegIns(false);
+
+//            if (writer != null) {
+//                writer.close();
+//                writer = null;
+//            }
+//            if (reader != null) {
+//                reader.close();
+//                reader = null;
+//            }
+
             if (socket != null) {
+                socket.shutdownInput();
+                socket.shutdownOutput();
+                socket.getInputStream().close();
+                socket.getOutputStream().close();
                 socket.close();
+                reader = null;
+                writer = null;
                 socket = null;
             }
             if (mThreadPool != null) {
@@ -235,9 +246,6 @@ public class LidarDevice {
                 mThreadPool = null;
             }
 
-            setConnected(false);
-            setStreamed(false);
-            setRegIns(false);
             Log.i(TAG, "成功断开设备连接");
 
         } catch (IOException e) {
@@ -302,7 +310,7 @@ public class LidarDevice {
                 sinUtil.clear();
                 String s = "{\"jsonrpc\":\"2.0\",\"method\":\"settings/get\",\"params\":{\"entry\":\"scan.frequency\"},\"id\":\"getScanFrequency\"}" + "\r\n";
                 try {
-                    TimeUnit.MILLISECONDS.sleep(100);
+                    TimeUnit.MILLISECONDS.sleep(300);
                     setRegIns(true);
                     writer.write(s);
                     writer.flush();
