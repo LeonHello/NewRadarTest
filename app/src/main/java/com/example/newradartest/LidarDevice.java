@@ -190,11 +190,11 @@ public class LidarDevice {
      */
     private boolean startTcpConnection(String IPAdr, int PORT) {
         try {
-            if (socket == null) {
+//            if (socket == null) {
                 /* 建立socket */
                 socket = new Socket(IPAdr, PORT);
                 Log.i(TAG, "TCP连接创建成功");
-            }
+//            }
             /* 输出流 */
             writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             /* 输入流 */
