@@ -190,11 +190,9 @@ public class LidarDevice {
      */
     private boolean startTcpConnection(String IPAdr, int PORT) {
         try {
-//            if (socket == null) {
-                /* 建立socket */
-                socket = new Socket(IPAdr, PORT);
-                Log.i(TAG, "TCP连接创建成功");
-//            }
+            /* 建立socket */
+            socket = new Socket(IPAdr, PORT);
+            Log.i(TAG, "TCP连接创建成功");
             /* 输出流 */
             writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             /* 输入流 */
@@ -218,37 +216,23 @@ public class LidarDevice {
 
             stopStreaming();
 
+            TimeUnit.MILLISECONDS.sleep(300);
             setConnected(false);
             setStreamed(false);
             setRegIns(false);
 
-//            if (writer != null) {
-//                writer.close();
-//                writer = null;
-//            }
-//            if (reader != null) {
-//                reader.close();
-//                reader = null;
-//            }
-
             if (socket != null) {
                 socket.shutdownInput();
                 socket.shutdownOutput();
-                socket.getInputStream().close();
-                socket.getOutputStream().close();
                 socket.close();
                 reader = null;
                 writer = null;
                 socket = null;
             }
-            if (mThreadPool != null) {
-                mThreadPool.shutdown();
-                mThreadPool = null;
-            }
 
             Log.i(TAG, "成功断开设备连接");
 
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
     }
