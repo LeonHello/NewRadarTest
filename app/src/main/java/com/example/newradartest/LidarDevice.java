@@ -214,7 +214,11 @@ public class LidarDevice {
     public void disconnect() {
         try {
 
-            stopStreaming();
+            String s = "{\"jsonrpc\":\"2.0\",\"method\":\"scan/stopStreaming\",\"id\":\"stopStreaming\"}" + "\r\n";
+            setRegIns(true);
+            writer.write(s);
+            writer.flush();
+            Log.i(TAG, "断开设备连接并发送停止数据传输命令: " + s);
 
             setConnected(false);
             setStreamed(false);
@@ -232,6 +236,9 @@ public class LidarDevice {
             Log.i(TAG, "成功断开设备连接");
 
         } catch (IOException e) {
+            setConnected(false);
+            setStreamed(false);
+            setRegIns(false);
             e.printStackTrace();
         }
     }
