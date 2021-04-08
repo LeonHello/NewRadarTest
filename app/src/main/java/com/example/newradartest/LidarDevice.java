@@ -156,6 +156,7 @@ public class LidarDevice {
      * @param PORT
      */
     public void connect(String IPAdr, int PORT) {
+
         mThreadPool.execute(new Runnable() {
             @Override
             public void run() {
@@ -164,6 +165,7 @@ public class LidarDevice {
                     if (startTcpConnection(IPAdr, PORT)) {
                         setConnected(true);
                         Log.i(TAG, "设备连接成功");
+                        getScanFrequency();
                         // 雷达连接时一直处理输入流
                         // while (isConnected)
                         handleReader();
@@ -177,8 +179,6 @@ public class LidarDevice {
 
             }
         });
-
-        getScanFrequency();
 
     }
 
@@ -216,7 +216,6 @@ public class LidarDevice {
 
             stopStreaming();
 
-            TimeUnit.MILLISECONDS.sleep(300);
             setConnected(false);
             setStreamed(false);
             setRegIns(false);
@@ -232,7 +231,7 @@ public class LidarDevice {
 
             Log.i(TAG, "成功断开设备连接");
 
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -287,24 +286,18 @@ public class LidarDevice {
      * 获取扫描频率
      */
     private void getScanFrequency() {
-        mThreadPool.execute(new Runnable() {
-            @Override
-            public void run() {
-                cosUtil.clear();
-                sinUtil.clear();
-                String s = "{\"jsonrpc\":\"2.0\",\"method\":\"settings/get\",\"params\":{\"entry\":\"scan.frequency\"},\"id\":\"getScanFrequency\"}" + "\r\n";
-                try {
-                    TimeUnit.MILLISECONDS.sleep(300);
-                    setRegIns(true);
-                    writer.write(s);
-                    writer.flush();
-                    Log.i(TAG, "已发送获取扫描频率命令: " + s);
-                } catch (IOException | InterruptedException e) {
-                    setRegIns(false);
-                    e.printStackTrace();
-                }
-            }
-        });
+        cosUtil.clear();
+        sinUtil.clear();
+        String s = "{\"jsonrpc\":\"2.0\",\"method\":\"settings/get\",\"params\":{\"entry\":\"scan.frequency\"},\"id\":\"getScanFrequency\"}" + "\r\n";
+        try {
+            setRegIns(true);
+            writer.write(s);
+            writer.flush();
+            Log.i(TAG, "已发送获取扫描频率命令: " + s);
+        } catch (IOException e) {
+            setRegIns(false);
+            e.printStackTrace();
+        }
     }
 
     /**

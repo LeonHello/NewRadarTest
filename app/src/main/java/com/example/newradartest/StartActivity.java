@@ -60,7 +60,7 @@ public class StartActivity extends Activity {
     private TextView text_left;
     private TextView text_right;
 
-    private LidarDevice lidarDevice = new LidarDevice(handler);
+    private LidarDevice lidarDevice;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -77,6 +77,8 @@ public class StartActivity extends Activity {
 //        text_middle = (TextView) findViewById(R.id.text_middle);
         text_left = (TextView) findViewById(R.id.text_left);
         text_right = (TextView) findViewById(R.id.text_right);
+
+        lidarDevice = new LidarDevice(handler);
 
         Button btn_connect = (Button) findViewById(R.id.btn_connect);
         Button btn_disconnect = (Button) findViewById(R.id.btn_disconnect);
