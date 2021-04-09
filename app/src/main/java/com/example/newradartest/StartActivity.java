@@ -62,6 +62,8 @@ public class StartActivity extends Activity {
 
     private LidarDevice lidarDevice;
 
+    private WifiLockManager wifiLockManager;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,6 +81,8 @@ public class StartActivity extends Activity {
         text_right = (TextView) findViewById(R.id.text_right);
 
         lidarDevice = new LidarDevice(handler);
+
+        wifiLockManager = new WifiLockManager(StartActivity.this);
 
         Button btn_connect = (Button) findViewById(R.id.btn_connect);
         Button btn_disconnect = (Button) findViewById(R.id.btn_disconnect);
@@ -101,6 +105,9 @@ public class StartActivity extends Activity {
 
                         Log.i(TAG, "连接雷达成功");
                         Toast.makeText(StartActivity.this, "连接雷达成功", Toast.LENGTH_SHORT).show();
+
+                        // 给Wifi上锁
+                        wifiLockManager.acquireWifiLock();
 
                     } else {
 
@@ -130,6 +137,9 @@ public class StartActivity extends Activity {
 
                         Log.i(TAG, "与雷达的连接已断开");
                         Toast.makeText(StartActivity.this, "与雷达的连接已断开", Toast.LENGTH_SHORT).show();
+
+                        // 给Wifi解锁
+                        wifiLockManager.releaseWifiLock();
 
                     } else {
 
