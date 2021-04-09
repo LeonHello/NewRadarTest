@@ -333,7 +333,7 @@ public class LidarDevice {
         try {
             String str;
             int index = 1;
-            while ((str = reader.readLine()) != null) {
+            while (socket != null && !socket.isInputShutdown() && (str = reader.readLine()) != null) {
 
                 // 当发送了常规指令时进行解析
                 if (isRegIns) {
