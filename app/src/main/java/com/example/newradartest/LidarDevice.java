@@ -251,7 +251,7 @@ public class LidarDevice {
                 setRegIns(true);
                 writer.write(s);
                 writer.flush();
-                Log.i(TAG, "已发送停止数据传输命令: " + s);
+                Log.i(TAG, "断开连接并发送停止数据传输命令: " + s);
             } catch (IOException e) {
                 setRegIns(false);
                 e.printStackTrace();
