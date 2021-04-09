@@ -216,8 +216,6 @@ public class LidarDevice {
                 try {
 
                     disconnectStopStreaming();
-                    // 暂停当前线程300ms让输入流处理停止传输指令
-                    TimeUnit.MILLISECONDS.sleep(300);
 
                     setConnected(false);
                     setStreamed(false);
@@ -236,7 +234,7 @@ public class LidarDevice {
 
                     Log.i(TAG, "成功断开设备连接");
 
-                } catch (IOException | InterruptedException e) {
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
