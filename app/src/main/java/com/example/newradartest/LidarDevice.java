@@ -132,9 +132,7 @@ public class LidarDevice {
         setStreamed(false);
         setFrequency(0);
 
-        int cpuNumbers = Runtime.getRuntime().availableProcessors();
-        // 根据CPU数目初始化线程池
-        mThreadPool = Executors.newFixedThreadPool(cpuNumbers * 5);
+        mThreadPool = Executors.newFixedThreadPool(10);
 
         mHandler = handler;
         setRestrictX(0);
@@ -212,29 +210,55 @@ public class LidarDevice {
      * 断开设备连接
      */
     public void disconnect() {
-        try {
+        mThreadPool.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
 
-            stopStreaming();
+                    disconnectStopStreaming();
 
-            setConnected(false);
-            setStreamed(false);
-            setRegIns(false);
+                    setConnected(false);
+                    setStreamed(false);
+                    setRegIns(false);
 
-            if (socket != null) {
-                socket.shutdownInput();
-                socket.shutdownOutput();
-                socket.close();
-                reader = null;
-                writer = null;
-                socket = null;
+                    if (socket != null) {
+                        socket.shutdownInput();
+                        socket.shutdownOutput();
+                        socket.close();
+                        reader = null;
+                        writer = null;
+                        socket = null;
+                    }
+
+                    Log.i(TAG, "成功断开设备连接");
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
+        });
 
-            Log.i(TAG, "成功断开设备连接");
+    }
 
-        } catch (IOException e) {
-            e.printStackTrace();
+
+    /**
+     * 停止数据传输后再断开连接
+     */
+    private void disconnectStopStreaming() {
+        if (isConnected && isStreamed) {
+            String s = "{\"jsonrpc\":\"2.0\",\"method\":\"scan/stopStreaming\",\"id\":\"stopStreaming\"}" + "\r\n";
+            try {
+                setRegIns(true);
+                writer.write(s);
+                writer.flush();
+                Log.i(TAG, "已发送停止数据传输命令: " + s);
+            } catch (IOException e) {
+                setRegIns(false);
+                e.printStackTrace();
+            }
         }
     }
+
 
     /**
      * 启动数据传输
