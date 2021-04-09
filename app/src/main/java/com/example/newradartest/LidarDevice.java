@@ -226,9 +226,11 @@ public class LidarDevice {
                     if (socket != null) {
                         socket.shutdownInput();
                         socket.shutdownOutput();
-                        socket.close();
+                        reader.close();
                         reader = null;
+                        writer.close();
                         writer = null;
+                        socket.close();
                         socket = null;
                     }
 
