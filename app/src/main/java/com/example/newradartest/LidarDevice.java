@@ -14,6 +14,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
@@ -190,7 +191,8 @@ public class LidarDevice {
         boolean flag = false;
         try {
             /* 建立socket */
-            socket = new Socket(IPAdr, PORT);
+            socket = new Socket();
+            socket.connect(new InetSocketAddress(IPAdr, PORT), 2000);
             /* 输出流 */
             writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             /* 输入流 */
