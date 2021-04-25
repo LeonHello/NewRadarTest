@@ -187,22 +187,32 @@ public class LidarDevice {
      * @param PORT
      */
     private boolean startTcpConnection(String IPAdr, int PORT) {
+        boolean flag = false;
         try {
             /* 建立socket */
             socket = new Socket(IPAdr, PORT);
-            Log.i(TAG, "TCP连接创建成功");
             /* 输出流 */
             writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             /* 输入流 */
             reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-            return true;
+            flag = socket.isConnected() && !socket.isClosed();
+            Message msg = mHandler.obtainMessage();
+            msg.what = 42;
+            msg.obj = flag;
+            mHandler.sendMessage(msg);
+            Log.i(TAG, "flag is " + flag + ", TCP连接创建成功");
+            return flag;
 
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        return false;
+        Message msg = mHandler.obtainMessage();
+        msg.what = 42;
+        msg.obj = flag;
+        mHandler.sendMessage(msg);
+        return flag;
     }
 
 

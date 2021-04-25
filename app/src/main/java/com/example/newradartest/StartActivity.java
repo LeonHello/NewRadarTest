@@ -27,6 +27,19 @@ public class StartActivity extends Activity {
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             switch (msg.what) {
+                case 42:
+                    if (Boolean.parseBoolean(msg.obj.toString())) {
+                        radar_state.setText("已连接");
+                        Log.i(TAG, "连接雷达成功");
+                        Toast.makeText(StartActivity.this, "连接雷达成功", Toast.LENGTH_SHORT).show();
+                        // 给Wifi上锁
+                        wifiLockManager.acquireWifiLock();
+                    } else {
+                        radar_state.setText("未连接");
+                        Log.i(TAG, "连接雷达失败，请查看是否正确选择WiFi");
+                        Toast.makeText(StartActivity.this, "连接雷达失败，请查看是否正确选择WiFi", Toast.LENGTH_SHORT).show();
+                    }
+                    break;
 //                case 43:
 //                    /* 调试输出 */
 //                    Log.i(TAG, " middle-->" + msg.obj.toString());
@@ -101,13 +114,6 @@ public class StartActivity extends Activity {
                         String IPAdr = edit_ip.getText().toString();
                         int PORT = Integer.parseInt(edit_port.getText().toString());
                         lidarDevice.connect(IPAdr, PORT);
-                        radar_state.setText("已连接");
-
-                        Log.i(TAG, "连接雷达成功");
-                        Toast.makeText(StartActivity.this, "连接雷达成功", Toast.LENGTH_SHORT).show();
-
-                        // 给Wifi上锁
-                        wifiLockManager.acquireWifiLock();
 
                     } else {
 
